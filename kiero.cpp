@@ -2,13 +2,14 @@
 #include <Windows.h>
 
 // Uncomment a needed graphical library (you can include all)
-//#include <d3d9.h>         // D3D9
-//#include <dxgi.h>         // D3D10/D3D11
-//#include <d3d10_1.h>      // D3D10
-//#include <d3d10.h>        // D3D10
-//#define KIERO_D3D10_USAGE // This need because d3d11.h includes d3d10.h
-//#include <d3d11.h>        // D3D11
-//#include <gl/GL.h>        // OpenGL
+//#include <d3d9.h>          // D3D9
+//#include <dxgi.h>          // D3D10/D3D11 
+//#include <d3d10_1.h>       // D3D10
+//#include <d3d10.h>         // D3D10
+//#define KIERO_D3D10_USAGE  // This need because d3d11.h includes d3d10.h
+//#include <d3d11.h>         // D3D11
+//#include <gl/GL.h>         // OpenGL
+//#include <vulkan/vulkan.h> // Vulkan
 
 #if defined(KIERO_D3D10_USAGE) && !defined(__d3d10_h__)
 #error KIERO_D3D10_USAGE defined, but d3d10.h not included
@@ -16,6 +17,7 @@
 
 static kiero::RenderType::Enum g_renderType = kiero::RenderType::None;
 
+// See METHODSTABLE.txt for more information
 #if KIERO_ARCH_X64
 static uint64_t* g_methodsTable = NULL;
 #else
@@ -126,7 +128,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 
 				return Status::Success;
-#endif
+#endif // _D3D9_H_
 			}
 			else if (_renderType == RenderType::D3D10)
 			{
@@ -217,11 +219,14 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				}
 
 #if KIERO_ARCH_X64
-				g_methodsTable = (uint64_t*)::malloc(18);
+				g_methodsTable = (uint64_t*)::malloc(116);
 				::memcpy(g_methodsTable, *(uint64_t**)swapChain, 18 * sizeof(uint64_t));
+				::memcpy(g_methodsTable + 18, *(uint64_t**)device, 98 * sizeof(uint64_t));
 #else
-				g_methodsTable = (uint32_t*)::malloc(18);
+
+				g_methodsTable = (uint32_t*)::malloc(116);
 				::memcpy(g_methodsTable, *(uint32_t**)swapChain, 18 * sizeof(uint32_t));
+				::memcpy(g_methodsTable + 18, *(uint32_t**)device, 98 * sizeof(uint32_t));
 #endif
 
 				swapChain->Release();
@@ -230,10 +235,13 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				device->Release();
 				device = NULL;
 
+				::DestroyWindow(window);
+				::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+
 				g_renderType = RenderType::D3D10;
 
 				return Status::Success;
-#endif
+#endif // __d3d10_h__
 			}
 			else if (_renderType == RenderType::D3D11)
 			{
@@ -307,11 +315,15 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				}
 
 #if KIERO_ARCH_X64
-				g_methodsTable = (uint64_t*)::malloc(18);
+				g_methodsTable = (uint64_t*)::malloc(205);
 				::memcpy(g_methodsTable, *(uint64_t**)swapChain, 18 * sizeof(uint64_t));
+				::memcpy(g_methodsTable + 18, *(uint64_t**)device, 43 * sizeof(uint64_t));
+				::memcpy(g_methodsTable + 18 + 43, *(uint64_t**)context, 144 * sizeof(uint64_t));
 #else
-				g_methodsTable = (uint32_t*)::malloc(18);
+				g_methodsTable = (uint32_t*)::malloc(205);
 				::memcpy(g_methodsTable, *(uint32_t**)swapChain, 18 * sizeof(uint32_t));
+				::memcpy(g_methodsTable + 18, *(uint32_t**)device, 43 * sizeof(uint32_t));
+				::memcpy(g_methodsTable + 18 + 43, *(uint32_t**)context, 144 * sizeof(uint32_t));
 #endif
 
 				swapChain->Release();
@@ -323,10 +335,13 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				context->Release();
 				context = NULL;
 
+				::DestroyWindow(window);
+				::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+
 				g_renderType = RenderType::D3D11;
 
 				return Status::Success;
-#endif
+#endif // __d3d11_h__
 			}
 
 			// TODO: Need write hook for D3D12
@@ -395,10 +410,61 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 			g_renderType = RenderType::OpenGL;
 
 			return Status::Success;
-#endif
+#endif // __gl_h_
 		}
+		else if (_renderType == RenderType::Vulkan) 
+		{
+#ifdef VULKAN_H_
+			HMODULE libVulkan;
+			if ((libVulkan = GetModuleHandle(KIERO_TEXT("vulcan-1.dll"))) == NULL)
+			{
+				return Status::ModuleNotFoundError;
+			}
 
-		// TODO: Need write hook for Vulcan
+			const char* const methodsNames[] = { 
+				"vkCreateInstance", "vkDestroyInstance", "vkEnumeratePhysicalDevices", "vkGetPhysicalDeviceFeatures", "vkGetPhysicalDeviceFormatProperties", "vkGetPhysicalDeviceImageFormatProperties",
+				"vkGetPhysicalDeviceProperties", "vkGetPhysicalDeviceQueueFamilyProperties", "vkGetPhysicalDeviceMemoryProperties", "vkGetInstanceProcAddr", "vkGetDeviceProcAddr", "vkCreateDevice",
+				"vkDestroyDevice", "vkEnumerateInstanceExtensionProperties", "vkEnumerateDeviceExtensionProperties", "vkEnumerateDeviceLayerProperties", "vkGetDeviceQueue", "vkQueueSubmit", "vkQueueWaitIdle",
+				"vkDeviceWaitIdle", "vkAllocateMemory", "vkFreeMemory", "vkMapMemory", "vkUnmapMemory", "vkFlushMappedMemoryRanges", "vkInvalidateMappedMemoryRanges", "vkGetDeviceMemoryCommitment", 
+				"vkBindBufferMemory", "vkBindImageMemory", "vkGetBufferMemoryRequirements", "vkGetImageMemoryRequirements", "vkGetImageSparseMemoryRequirements", "vkGetPhysicalDeviceSparseImageFormatProperties",
+				"vkQueueBindSparse", "vkCreateFence", "vkDestroyFence", "vkResetFences", "vkGetFenceStatus", "vkWaitForFences", "vkCreateSemaphore", "vkDestroySemaphore", "vkCreateEvent", "vkDestroyEvent", 
+				"vkGetEventStatus", "vkSetEvent", "vkResetEvent", "vkCreateQueryPool", "vkDestroyQueryPool", "vkGetQueryPoolResults", "vkCreateBuffer", "vkDestroyBuffer", "vkCreateBufferView", "vkDestroyBufferView",
+				"vkCreateImage", "vkDestroyImage", "vkGetImageSubresourceLayout", "vkCreateImageView", "vkDestroyImageView", "vkCreateShaderModule", "vkDestroyShaderModule", "vkCreatePipelineCache", 
+				"vkDestroyPipelineCache", "vkGetPipelineCacheData", "vkMergePipelineCaches", "vkCreateGraphicsPipelines", "vkCreateComputePipelines", "vkDestroyPipeline", "vkCreatePipelineLayout", 
+				"vkDestroyPipelineLayout", "vkCreateSampler", "vkDestroySampler", "vkCreateDescriptorSetLayout", "vkDestroyDescriptorSetLayout", "vkCreateDescriptorPool", "vkDestroyDescriptorPool",
+				"vkResetDescriptorPool", "vkAllocateDescriptorSets", "vkFreeDescriptorSets", "vkUpdateDescriptorSets", "vkCreateFramebuffer", "vkDestroyFramebuffer", "vkCreateRenderPass", "vkDestroyRenderPass",
+				"vkGetRenderAreaGranularity", "vkCreateCommandPool", "vkDestroyCommandPool", "vkResetCommandPool", "vkAllocateCommandBuffers", "vkFreeCommandBuffers", "vkBeginCommandBuffer", "vkEndCommandBuffer",
+				"vkResetCommandBuffer", "vkCmdBindPipeline", "vkCmdSetViewport", "vkCmdSetScissor", "vkCmdSetLineWidth", "vkCmdSetDepthBias", "vkCmdSetBlendConstants", "vkCmdSetDepthBounds", 
+				"vkCmdSetStencilCompareMask", "vkCmdSetStencilWriteMask", "vkCmdSetStencilReference", "vkCmdBindDescriptorSets", "vkCmdBindIndexBuffer", "vkCmdBindVertexBuffers", "vkCmdDraw", "vkCmdDrawIndexed",
+				"vkCmdDrawIndirect", "vkCmdDrawIndexedIndirect", "vkCmdDispatch", "vkCmdDispatchIndirect", "vkCmdCopyBuffer", "vkCmdCopyImage", "vkCmdBlitImage", "vkCmdCopyBufferToImage", "vkCmdCopyImageToBuffer",
+				"vkCmdUpdateBuffer", "vkCmdFillBuffer", "vkCmdClearColorImage", "vkCmdClearDepthStencilImage", "vkCmdClearAttachments", "vkCmdResolveImage", "vkCmdSetEvent", "vkCmdResetEvent", "vkCmdWaitEvents",
+				"vkCmdPipelineBarrier", "vkCmdBeginQuery", "vkCmdEndQuery", "vkCmdResetQueryPool", "vkCmdWriteTimestamp", "vkCmdCopyQueryPoolResults", "vkCmdPushConstants", "vkCmdBeginRenderPass", "vkCmdNextSubpass",
+				"vkCmdEndRenderPass", "vkCmdExecuteCommands"
+			};
+
+			size_t size = KIERO_ARRAY_SIZE(methodsNames);
+
+#if KIERO_ARCH_X64
+			g_methodsTable = (uint64_t*)::malloc(size);
+
+			for (int i = 0; i < size; i++)
+			{
+				g_methodsTable[i] = (uint64_t)::GetProcAddress(libVulkan, methodsNames[i]);
+			}
+#else
+			g_methodsTable = (uint32_t*)::malloc(size);
+
+			for (int i = 0; i < size; i++)
+			{
+				g_methodsTable[i] = (uint32_t)::GetProcAddress(libVulkan, methodsNames[i]);
+			}
+#endif
+
+			g_renderType = RenderType::Vulkan;
+
+			return Status::Success;
+#endif // VULKAN_H_
+		}
 
 		return Status::NotSupportedError;
 	}
@@ -436,4 +502,7 @@ uint32_t* kiero::getMethodsTable()
 void kiero::bind(uint16_t _index, void* _original, void* _function)
 {
 	// TODO: This function must be as detour for methods from g_methodsTable
+#if KIERO_ARCH_X64
+#else
+#endif
 }
