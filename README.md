@@ -7,13 +7,17 @@
     <img src="https://img.shields.io/github/stars/Rebzzel/kiero.svg?style=flat-square"/>
   </a>
   <br>
-  Universal graphical hook for a D3D9-D3D11<strike>12</strike>, OpenGL <strike>and Vulcan</strike> based games
+  Universal graphical hook for a D3D9-D3D11<strike>12</strike>, OpenGL and Vulcan based games
 </p>
 
 ### Requirement
-![Windows SDK](https://www.microsoft.com/en-us/download/details.aspx?id=8279)
+![Windows SDK](https://www.microsoft.com/en-us/download/details.aspx?id=8279) (If you need d3d9-d3d11 and opengl hooks)
+
+![Vulcan SDK](https://www.lunarg.com/vulkan-sdk) (If you need vulkan hook)
 
 ### Example
+In kiero there is a methods table which contains addresses of graphic functions. **To get the method you want, find it in METHODSTABLE.txt**
+
 Becouse `bind` function in development, we use ![MinHook](https://github.com/TsudaKageyu/minhook)
 ```C++
 #include "kiero.h"
