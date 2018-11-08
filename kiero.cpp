@@ -109,10 +109,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				}
 
 #if KIERO_ARCH_X64
-				g_methodsTable = (uint64_t*)::malloc(119);
+				g_methodsTable = (uint64_t*)::calloc(119, sizeof(uint64_t));
 				::memcpy(g_methodsTable, *(uint64_t**)device, 119 * sizeof(uint64_t));
 #else
-				g_methodsTable = (uint32_t*)::malloc(119);
+				g_methodsTable = (uint32_t*)::calloc(119, sizeof(uint32_t));
 				::memcpy(g_methodsTable, *(uint32_t**)device, 119 * sizeof(uint32_t));
 #endif
 
@@ -219,12 +219,12 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				}
 
 #if KIERO_ARCH_X64
-				g_methodsTable = (uint64_t*)::malloc(116);
+				g_methodsTable = (uint64_t*)::calloc(116, sizeof(uint64_t));
 				::memcpy(g_methodsTable, *(uint64_t**)swapChain, 18 * sizeof(uint64_t));
 				::memcpy(g_methodsTable + 18, *(uint64_t**)device, 98 * sizeof(uint64_t));
 #else
 
-				g_methodsTable = (uint32_t*)::malloc(116);
+				g_methodsTable = (uint32_t*)::calloc(116, sizeof(uint32_t));
 				::memcpy(g_methodsTable, *(uint32_t**)swapChain, 18 * sizeof(uint32_t));
 				::memcpy(g_methodsTable + 18, *(uint32_t**)device, 98 * sizeof(uint32_t));
 #endif
@@ -315,12 +315,12 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				}
 
 #if KIERO_ARCH_X64
-				g_methodsTable = (uint64_t*)::malloc(205);
+				g_methodsTable = (uint64_t*)::calloc(205, sizeof(uint64_t));
 				::memcpy(g_methodsTable, *(uint64_t**)swapChain, 18 * sizeof(uint64_t));
 				::memcpy(g_methodsTable + 18, *(uint64_t**)device, 43 * sizeof(uint64_t));
 				::memcpy(g_methodsTable + 18 + 43, *(uint64_t**)context, 144 * sizeof(uint64_t));
 #else
-				g_methodsTable = (uint32_t*)::malloc(205);
+				g_methodsTable = (uint32_t*)::calloc(205, sizeof(uint32_t));
 				::memcpy(g_methodsTable, *(uint32_t**)swapChain, 18 * sizeof(uint32_t));
 				::memcpy(g_methodsTable + 18, *(uint32_t**)device, 43 * sizeof(uint32_t));
 				::memcpy(g_methodsTable + 18 + 43, *(uint32_t**)context, 144 * sizeof(uint32_t));
@@ -392,14 +392,14 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 			size_t size = KIERO_ARRAY_SIZE(methodsNames);
 
 #if KIERO_ARCH_X64
-			g_methodsTable = (uint32_t*)::malloc(size);
+			g_methodsTable = (uint64_t*)::calloc(size, sizeof(uint64_t));
 
 			for (int i = 0; i < size; i++)
 			{
 				g_methodsTable[i] = (uint64_t)::GetProcAddress(libOpenGL32, methodsNames[i]);
 			}
 #else
-			g_methodsTable = (uint32_t*)::malloc(size);
+			g_methodsTable = (uint32_t*)::calloc(size, sizeof(uint32_t));
 
 			for (int i = 0; i < size; i++)
 			{
@@ -445,14 +445,14 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 			size_t size = KIERO_ARRAY_SIZE(methodsNames);
 
 #if KIERO_ARCH_X64
-			g_methodsTable = (uint64_t*)::malloc(size);
+			g_methodsTable = (uint64_t*)::calloc(size, sizeof(uint64_t));
 
 			for (int i = 0; i < size; i++)
 			{
 				g_methodsTable[i] = (uint64_t)::GetProcAddress(libVulkan, methodsNames[i]);
 			}
 #else
-			g_methodsTable = (uint32_t*)::malloc(size);
+			g_methodsTable = (uint32_t*)::calloc(size, sizeof(uint32_t));
 
 			for (int i = 0; i < size; i++)
 			{
