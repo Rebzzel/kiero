@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#define KIERO_VERSION "1.1.4"
+#define KIERO_VERSION "1.1.6"
 
 #define KIERO_ARCH_X64 0
 #define KIERO_ARCH_X86 0
@@ -48,7 +48,7 @@ namespace kiero
 			D3D9,   // Implemented
 			D3D10,  // Implemented
 			D3D11,  // Implemented
-			D3D12,  // In development
+			D3D12,  // Implemented
 
 			OpenGL, // Implemented
 			Vulkan  // Implemented
