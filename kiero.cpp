@@ -1,6 +1,10 @@
 #include "kiero.h"
 #include <Windows.h>
 
+#ifdef KIERO_USE_MINHOOK
+# include "minhook/include/MinHook.h"
+#endif
+
 // Uncomment a needed graphical library (you can include all)
 //#include <d3d9.h>          // D3D9
 //#include <dxgi.h>          // D3D10/D3D11/D3D12 (must be included for d3d12 hook)
@@ -121,6 +125,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				::memcpy(g_methodsTable, *(uint32_t**)device, 119 * sizeof(uint32_t));
 #endif
 
+#ifdef KIERO_USE_MINHOOK
+				MH_Initialize();
+#endif
+
 				direct3D9->Release();
 				direct3D9 = NULL;
 
@@ -234,6 +242,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				::memcpy(g_methodsTable + 18, *(uint32_t**)device, 98 * sizeof(uint32_t));
 #endif
 
+#ifdef KIERO_USE_MINHOOK
+				MH_Initialize();
+#endif
+
 				swapChain->Release();
 				swapChain = NULL;
 
@@ -329,6 +341,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				::memcpy(g_methodsTable, *(uint32_t**)swapChain, 18 * sizeof(uint32_t));
 				::memcpy(g_methodsTable + 18, *(uint32_t**)device, 43 * sizeof(uint32_t));
 				::memcpy(g_methodsTable + 18 + 43, *(uint32_t**)context, 144 * sizeof(uint32_t));
+#endif
+
+#ifdef KIERO_USE_MINHOOK
+				MH_Initialize();
 #endif
 
 				swapChain->Release();
@@ -480,6 +496,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				memcpy(g_methodsTable + 44 + 19 + 9 + 60, *(uint32_t**)swapChain, 18 * sizeof(uint32_t));
 #endif
 
+#ifdef KIERO_USE_MINHOOK
+				MH_Initialize();
+#endif
+
 				device->Release();
 				device = NULL;
 
@@ -565,6 +585,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 			}
 #endif
 
+#ifdef KIERO_USE_MINHOOK
+			MH_Initialize();
+#endif
+
 			g_renderType = RenderType::OpenGL;
 
 			return Status::Success;
@@ -618,6 +642,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 			}
 #endif
 
+#ifdef KIERO_USE_MINHOOK
+			MH_Initialize();
+#endif
+
 			g_renderType = RenderType::Vulkan;
 
 			return Status::Success;
@@ -634,6 +662,10 @@ void kiero::shutdown()
 {
 	if (g_renderType > 0)
 	{
+#ifdef KIERO_USE_MINHOOK
+		MH_Uninitialize();
+#endif
+
 		::free(g_methodsTable);
 		g_methodsTable = NULL;
 		g_renderType = RenderType::None;
@@ -659,8 +691,13 @@ uint32_t* kiero::getMethodsTable()
 
 void kiero::bind(uint16_t _index, void* _original, void* _function)
 {
-	// TODO: This function must be as detour for methods from g_methodsTable
-#if KIERO_ARCH_X64
-#else
+	// TODO: Need own detour function
+
+#ifdef KIERO_USE_MINHOOK
+	if (g_renderType > 0)
+	{
+		MH_CreateHook((void*)g_methodsTable[_index], _function, &_original);
+		MH_EnableHook((void*)g_methodsTable[_index]);
+	}
 #endif
 }

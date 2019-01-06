@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include <string.h>
 
-#define KIERO_VERSION "1.1.6"
+#define KIERO_VERSION "1.1.8"
+
+#define KIERO_USE_MINHOOK
 
 #define KIERO_ARCH_X64 0
 #define KIERO_ARCH_X86 0
