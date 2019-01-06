@@ -16,9 +16,10 @@
 [Vulcan SDK](https://www.lunarg.com/vulkan-sdk) (If you need vulkan hook)
 
 ### Example
+Before we begin, **we need to uncomment the required header of graphical library in kiero.cpp**
+
 In kiero there is a methods table which contains addresses of graphic functions. **To get the method you want, find it in METHODSTABLE.txt**
 
-Becouse `bind` function in development, we use [MinHook](https://github.com/TsudaKageyu/minhook)
 ```C++
 #include "kiero.h"
 #include <d3d9.h>
@@ -30,6 +31,13 @@ EndScene oEndScene = NULL;
 
 long __stdcall hkEndScene(LPDIRECT3DDEVICE pDevice)
 {
+  static bool init = false;
+  if (!init)
+  {
+    MessageBox(0, "Boom! It's works!", "Kiero", MB_OK);
+    init = true;
+  }
+  
   return oEndScene(pDevice);
 }
 
@@ -37,10 +45,7 @@ int kieroExampleThread()
 {
   if (kiero::init(kiero::RenderType::D3D9) == kiero::Status::Success)
   {
-    MH_Initialize();
-    
-    MH_CreateHook((LPVOID)kiero::getMethodsTable()[42], hkEndScene, (LPVOID*)&oEndScene);
-    MH_EnableHook((LPVOID)kiero::getMethodsTable()[42]);
+    kiero::bind(42, oEndScene, hkEndScene);
   }
   
   return 0;
