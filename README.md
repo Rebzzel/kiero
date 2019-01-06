@@ -11,14 +11,14 @@
 </p>
 
 ### Requirement
-![Windows SDK](https://www.microsoft.com/en-us/download/details.aspx?id=8279) or ![DirectX SDK](https://www.microsoft.com/en-us/download/details.aspx?id=4064) (If you need d3d9-d3d12 and opengl hooks)
+[Windows SDK](https://www.microsoft.com/en-us/download/details.aspx?id=8279) or [DirectX SDK](https://www.microsoft.com/en-us/download/details.aspx?id=4064) (If you need d3d9-d3d12 and opengl hooks)
 
-![Vulcan SDK](https://www.lunarg.com/vulkan-sdk) (If you need vulkan hook)
+[Vulcan SDK](https://www.lunarg.com/vulkan-sdk) (If you need vulkan hook)
 
 ### Example
 In kiero there is a methods table which contains addresses of graphic functions. **To get the method you want, find it in METHODSTABLE.txt**
 
-Becouse `bind` function in development, we use ![MinHook](https://github.com/TsudaKageyu/minhook)
+Becouse `bind` function in development, we use [MinHook](https://github.com/TsudaKageyu/minhook)
 ```C++
 #include "kiero.h"
 #include <d3d9.h>
@@ -62,7 +62,7 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD fdwReason, LPVOID)
 ```
 
 ### Contributors
-![Rebzzel](https://github.com/Rebzzel)
+[Rebzzel](https://github.com/Rebzzel)
 
 ### License
 ```
