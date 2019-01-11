@@ -689,14 +689,14 @@ uint32_t* kiero::getMethodsTable()
 }
 #endif
 
-void kiero::bind(uint16_t _index, void* _original, void* _function)
+void kiero::bind(uint16_t _index, void** _original, void* _function)
 {
 	// TODO: Need own detour function
 
 #ifdef KIERO_USE_MINHOOK
 	if (g_renderType > 0)
 	{
-		MH_CreateHook((void*)g_methodsTable[_index], _function, &_original);
+		MH_CreateHook((void*)g_methodsTable[_index], _function, _original);
 		MH_EnableHook((void*)g_methodsTable[_index]);
 	}
 #endif

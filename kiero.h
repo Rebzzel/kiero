@@ -69,7 +69,7 @@ namespace kiero
 	uint32_t* getMethodsTable();
 #endif
 
-	void bind(uint16_t index, void* original, void* function);
+	void bind(uint16_t index, void** original, void* function);
 }
 
 #endif // __KIERO_H__
