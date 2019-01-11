@@ -26,10 +26,10 @@ In kiero there is a methods table which contains addresses of graphic functions.
 #include <MinHook.h>
 #include <Windows.h>
 
-typedef long(__stdcall* EndScene)(LPDIRECT3DDEVICE);
+typedef long(__stdcall* EndScene)(LPDIRECT3DDEVICE9);
 EndScene oEndScene = NULL;
 
-long __stdcall hkEndScene(LPDIRECT3DDEVICE pDevice)
+long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 {
   static bool init = false;
   if (!init)
@@ -45,7 +45,7 @@ int kieroExampleThread()
 {
   if (kiero::init(kiero::RenderType::D3D9) == kiero::Status::Success)
   {
-    kiero::bind(42, oEndScene, hkEndScene);
+    kiero::bind(42, (void**)&oEndScene, hkEndScene);
   }
   
   return 0;
