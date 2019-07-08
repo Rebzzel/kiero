@@ -2,11 +2,16 @@
 #define __KIERO_H__
 
 #include <stdint.h>
-#include <string.h>
 
-#define KIERO_VERSION "1.1.8"
+#define KIERO_VERSION "1.2.6"
 
-#define KIERO_USE_MINHOOK
+#define KIERO_INCLUDE_D3D9   0 // 1 if you need D3D9 hook
+#define KIERO_INCLUDE_D3D10  0 // 1 if you need D3D10 hook
+#define KIERO_INCLUDE_D3D11  0 // 1 if you need D3D11 hook
+#define KIERO_INCLUDE_D3D12  0 // 1 if you need D3D12 hook
+#define KIERO_INCLUDE_OPENGL 0 // 1 if you need OpenGL hook
+#define KIERO_INCLUDE_VULKAN 0 // 1 if you need Vulkan hook
+#define KIERO_USE_MINHOOK    0 // 1 if you will use kiero::bind function
 
 #define KIERO_ARCH_X64 0
 #define KIERO_ARCH_X86 0
@@ -19,13 +24,11 @@
 # define KIERO_ARCH_X86 1
 #endif
 
-#ifdef _UNICODE
-# define KIERO_TEXT(text) L##text
+#if KIERO_ARCH_X64
+typedef uint64_t uint150_t;
 #else
-# define KIERO_TEXT(text) text
+typedef uint32_t uint150_t;
 #endif
-
-#define KIERO_ARRAY_SIZE(arr) ((size_t)(sizeof(arr)/sizeof(arr[0])))
 
 namespace kiero
 {
@@ -37,6 +40,9 @@ namespace kiero
 			NotSupportedError = -2,
 			ModuleNotFoundError = -3,
 
+			AlreadyInitializedError = -4,
+			NotInitializedError = -5,
+
 			Success = 0,
 		};
 	};
@@ -47,29 +53,26 @@ namespace kiero
 		{
 			None,
 
-			D3D9,   // Implemented
-			D3D10,  // Implemented
-			D3D11,  // Implemented
-			D3D12,  // Implemented
+			D3D9,
+			D3D10,
+			D3D11,
+			D3D12,
 
-			OpenGL, // Implemented
-			Vulkan  // Implemented
+			OpenGL,
+			Vulkan,
+
+			Auto
 		};
 	};
 
 	Status::Enum init(RenderType::Enum renderType);
-
 	void shutdown();
 
+	Status::Enum bind(uint16_t index, void** original, void* function);
+	void unbind(uint16_t index);
+
 	RenderType::Enum getRenderType();
-
-#if KIERO_ARCH_X64
-	uint64_t* getMethodsTable();
-#else
-	uint32_t* getMethodsTable();
-#endif
-
-	void bind(uint16_t index, void** original, void* function);
+	uint150_t* getMethodsTable();
 }
 
 #endif // __KIERO_H__

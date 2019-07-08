@@ -1,43 +1,60 @@
 #include "kiero.h"
 #include <Windows.h>
+#include <assert.h>
 
-#ifdef KIERO_USE_MINHOOK
+#if KIERO_INCLUDE_D3D9
+# include <d3d9.h>
+#endif
+
+#if KIERO_INCLUDE_D3D10
+# include <dxgi.h>
+# include <d3d10_1.h>
+# include <d3d10.h>
+#endif
+
+#if KIERO_INCLUDE_D3D11
+# include <dxgi.h>
+# include <d3d11.h>
+#endif
+
+#if KIERO_INCLUDE_D3D12
+# include <dxgi.h>
+# include <d3d12.h>
+#endif
+
+#if KIERO_INCLUDE_OPENGL
+# include <gl/GL.h>
+#endif
+
+#if KIERO_INCLUDE_VULKAN
+# include <vulkan/vulkan.h>
+#endif
+
+#if KIERO_USE_MINHOOK
 # include "minhook/include/MinHook.h"
 #endif
 
-// Uncomment a needed graphical library (you can include all)
-//#include <d3d9.h>          // D3D9
-//#include <dxgi.h>          // D3D10/D3D11/D3D12 (must be included for d3d12 hook)
-//#include <d3d10_1.h>       // D3D10
-//#include <d3d10.h>         // D3D10
-//#define KIERO_D3D10_USAGE  // This need because d3d11.h includes d3d10.h
-//#include <d3d11.h>         // D3D11
-//#include <d3d12.h>         // D3D12
-//#include <gl/GL.h>         // OpenGL
-//#include <vulkan/vulkan.h> // Vulkan
-
-#if defined(KIERO_D3D10_USAGE) && !defined(__d3d10_h__)
-# error KIERO_D3D10_USAGE defined, but d3d10.h not included
+#ifdef _UNICODE
+# define KIERO_TEXT(text) L##text
+#else
+# define KIERO_TEXT(text) text
 #endif
 
-#if defined(__d3d12_h__) && !defined(__dxgi_h__)
-# error d3d12.h included, but dxgi.h not included
-#endif
+#define KIERO_ARRAY_SIZE(arr) ((size_t)(sizeof(arr)/sizeof(arr[0])))
 
 static kiero::RenderType::Enum g_renderType = kiero::RenderType::None;
-
-// See METHODSTABLE.txt for more information
-#if KIERO_ARCH_X64
-static uint64_t* g_methodsTable = NULL;
-#else
-static uint32_t* g_methodsTable = NULL;
-#endif
+static uint150_t* g_methodsTable = NULL;
 
 kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 {
+	if (g_renderType != RenderType::None)
+	{
+		return Status::AlreadyInitializedError;
+	}
+
 	if (_renderType != RenderType::None)
 	{
-		if (_renderType >= RenderType::D3D9 && _renderType <= RenderType::D3D12) 
+		if (_renderType >= RenderType::D3D9 && _renderType <= RenderType::D3D12)
 		{
 			WNDCLASSEX windowClass;
 			windowClass.cbSize = sizeof(WNDCLASSEX);
@@ -59,7 +76,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 
 			if (_renderType == RenderType::D3D9)
 			{
-#ifdef _D3D9_H_
+#if KIERO_INCLUDE_D3D9
 				HMODULE libD3D9;
 				if ((libD3D9 = ::GetModuleHandle(KIERO_TEXT("d3d9.dll"))) == NULL)
 				{
@@ -113,17 +130,12 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				{
 					direct3D9->Release();
 					::DestroyWindow(window);
-					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);	
+					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 					return Status::UnknownError;
 				}
 
-#if KIERO_ARCH_X64
-				g_methodsTable = (uint64_t*)::calloc(119, sizeof(uint64_t));
-				::memcpy(g_methodsTable, *(uint64_t**)device, 119 * sizeof(uint64_t));
-#else
-				g_methodsTable = (uint32_t*)::calloc(119, sizeof(uint32_t));
-				::memcpy(g_methodsTable, *(uint32_t**)device, 119 * sizeof(uint32_t));
-#endif
+				g_methodsTable = (uint150_t*)::calloc(119, sizeof(uint150_t));
+				::memcpy(g_methodsTable, *(uint150_t**)device, 119 * sizeof(uint150_t));
 
 #ifdef KIERO_USE_MINHOOK
 				MH_Initialize();
@@ -141,11 +153,11 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 
 				return Status::Success;
-#endif // _D3D9_H_
+#endif
 			}
 			else if (_renderType == RenderType::D3D10)
 			{
-#if defined(__d3d10_h__) && defined(KIERO_D3D10_USAGE)
+#if KIERO_INCLUDE_D3D10
 				HMODULE libDXGI;
 				HMODULE libD3D10;
 				if ((libDXGI = ::GetModuleHandle(KIERO_TEXT("dxgi.dll"))) == NULL || (libD3D10 = ::GetModuleHandle(KIERO_TEXT("d3d10.dll"))) == NULL)
@@ -231,16 +243,9 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 					return Status::UnknownError;
 				}
 
-#if KIERO_ARCH_X64
-				g_methodsTable = (uint64_t*)::calloc(116, sizeof(uint64_t));
-				::memcpy(g_methodsTable, *(uint64_t**)swapChain, 18 * sizeof(uint64_t));
-				::memcpy(g_methodsTable + 18, *(uint64_t**)device, 98 * sizeof(uint64_t));
-#else
-
-				g_methodsTable = (uint32_t*)::calloc(116, sizeof(uint32_t));
-				::memcpy(g_methodsTable, *(uint32_t**)swapChain, 18 * sizeof(uint32_t));
-				::memcpy(g_methodsTable + 18, *(uint32_t**)device, 98 * sizeof(uint32_t));
-#endif
+				g_methodsTable = (uint150_t*)::calloc(116, sizeof(uint150_t));
+				::memcpy(g_methodsTable, *(uint150_t**)swapChain, 18 * sizeof(uint150_t));
+				::memcpy(g_methodsTable + 18, *(uint150_t**)device, 98 * sizeof(uint150_t));
 
 #ifdef KIERO_USE_MINHOOK
 				MH_Initialize();
@@ -258,11 +263,11 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				g_renderType = RenderType::D3D10;
 
 				return Status::Success;
-#endif // __d3d10_h__
+#endif
 			}
 			else if (_renderType == RenderType::D3D11)
 			{
-#ifdef __d3d11_h__
+#if KIERO_INCLUDE_D3D11
 				HMODULE libD3D11;
 				if ((libD3D11 = ::GetModuleHandle(KIERO_TEXT("d3d11.dll"))) == NULL)
 				{
@@ -331,17 +336,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 					return Status::UnknownError;
 				}
 
-#if KIERO_ARCH_X64
-				g_methodsTable = (uint64_t*)::calloc(205, sizeof(uint64_t));
-				::memcpy(g_methodsTable, *(uint64_t**)swapChain, 18 * sizeof(uint64_t));
-				::memcpy(g_methodsTable + 18, *(uint64_t**)device, 43 * sizeof(uint64_t));
-				::memcpy(g_methodsTable + 18 + 43, *(uint64_t**)context, 144 * sizeof(uint64_t));
-#else
-				g_methodsTable = (uint32_t*)::calloc(205, sizeof(uint32_t));
-				::memcpy(g_methodsTable, *(uint32_t**)swapChain, 18 * sizeof(uint32_t));
-				::memcpy(g_methodsTable + 18, *(uint32_t**)device, 43 * sizeof(uint32_t));
-				::memcpy(g_methodsTable + 18 + 43, *(uint32_t**)context, 144 * sizeof(uint32_t));
-#endif
+				g_methodsTable = (uint150_t*)::calloc(205, sizeof(uint150_t));
+				::memcpy(g_methodsTable, *(uint150_t**)swapChain, 18 * sizeof(uint150_t));
+				::memcpy(g_methodsTable + 18, *(uint150_t**)device, 43 * sizeof(uint150_t));
+				::memcpy(g_methodsTable + 18 + 43, *(uint150_t**)context, 144 * sizeof(uint150_t));
 
 #ifdef KIERO_USE_MINHOOK
 				MH_Initialize();
@@ -362,11 +360,11 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				g_renderType = RenderType::D3D11;
 
 				return Status::Success;
-#endif // __d3d11_h__
+#endif
 			}
 			else if (_renderType == RenderType::D3D12)
 			{
-#if defined(__d3d12_h__) && defined(__dxgi_h__)
+#if KIERO_INCLUDE_D3D12
 				HMODULE libDXGI;
 				HMODULE libD3D12;
 				if ((libDXGI = ::GetModuleHandle(KIERO_TEXT("dxgi.dll"))) == NULL || (libD3D12 = ::GetModuleHandle(KIERO_TEXT("d3d12.dll"))) == NULL)
@@ -480,21 +478,12 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 					return Status::UnknownError;
 				}
 
-#if KIERO_ARCH_X64
-				g_methodsTable = (uint64_t*)::calloc(150, sizeof(uint64_t));
-				memcpy(g_methodsTable, *(uint64_t**)device, 44 * sizeof(uint64_t));
-				memcpy(g_methodsTable + 44, *(uint64_t**)commandQueue, 19 * sizeof(uint64_t));
-				memcpy(g_methodsTable + 44 + 19, *(uint64_t**)commandAllocator, 9 * sizeof(uint64_t));
-				memcpy(g_methodsTable + 44 + 19 + 9, *(uint64_t**)commandList, 60 * sizeof(uint64_t));
-				memcpy(g_methodsTable + 44 + 19 + 9 + 60, *(uint64_t**)swapChain, 18 * sizeof(uint64_t));
-#else
-				g_methodsTable = (uint32_t*)::calloc(150, sizeof(uint32_t));
-				memcpy(g_methodsTable, *(uint32_t**)device, 44 * sizeof(uint32_t));
-				memcpy(g_methodsTable + 44, *(uint32_t**)commandQueue, 19 * sizeof(uint32_t));
-				memcpy(g_methodsTable + 44 + 19, *(uint32_t**)commandAllocator, 9 * sizeof(uint32_t));
-				memcpy(g_methodsTable + 44 + 19 + 9, *(uint32_t**)commandList, 60 * sizeof(uint32_t));
-				memcpy(g_methodsTable + 44 + 19 + 9 + 60, *(uint32_t**)swapChain, 18 * sizeof(uint32_t));
-#endif
+				g_methodsTable = (uint150_t*)::calloc(150, sizeof(uint150_t));
+				memcpy(g_methodsTable, *(uint150_t**)device, 44 * sizeof(uint150_t));
+				memcpy(g_methodsTable + 44, *(uint150_t**)commandQueue, 19 * sizeof(uint150_t));
+				memcpy(g_methodsTable + 44 + 19, *(uint150_t**)commandAllocator, 9 * sizeof(uint150_t));
+				memcpy(g_methodsTable + 44 + 19 + 9, *(uint150_t**)commandList, 60 * sizeof(uint150_t));
+				memcpy(g_methodsTable + 44 + 19 + 9 + 60, *(uint150_t**)swapChain, 18 * sizeof(uint150_t));
 
 #ifdef KIERO_USE_MINHOOK
 				MH_Initialize();
@@ -521,24 +510,27 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				g_renderType = RenderType::D3D12;
 
 				return Status::Success;
-#endif // __d3d12_h__
+#endif
 			}
+
+			::DestroyWindow(window);
+			::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 
 			return Status::NotSupportedError;
 		}
 		else if (_renderType == RenderType::OpenGL)
 		{
-#ifdef __gl_h_
+#if KIERO_INCLUDE_OPENGL
 			HMODULE libOpenGL32;
 			if ((libOpenGL32 = ::GetModuleHandle(KIERO_TEXT("opengl32.dll"))) == NULL)
 			{
 				return Status::ModuleNotFoundError;
 			}
 
-			const char* const methodsNames[] = { 
-				"glAccum", "glAlphaFunc", "glAreTexturesResident", "glArrayElement", "glBegin", "glBindTexture", "glBitmap", "glBlendFunc", "glCallList", "glCallLists", "glClear", "glClearAccum", 
+			const char* const methodsNames[] = {
+				"glAccum", "glAlphaFunc", "glAreTexturesResident", "glArrayElement", "glBegin", "glBindTexture", "glBitmap", "glBlendFunc", "glCallList", "glCallLists", "glClear", "glClearAccum",
 				"glClearColor", "glClearDepth", "glClearIndex", "glClearStencil", "glClipPlane", "glColor3b", "glColor3bv", "glColor3d", "glColor3dv", "glColor3f", "glColor3fv", "glColor3i", "glColor3iv",
-				"glColor3s", "glColor3sv", "glColor3ub", "glColor3ubv", "glColor3ui", "glColor3uiv", "glColor3us", "glColor3usv", "glColor4b", "glColor4bv", "glColor4d", "glColor4dv", "glColor4f", 
+				"glColor3s", "glColor3sv", "glColor3ub", "glColor3ubv", "glColor3ui", "glColor3uiv", "glColor3us", "glColor3usv", "glColor4b", "glColor4bv", "glColor4d", "glColor4dv", "glColor4f",
 				"glColor4fv", "glColor4i", "glColor4iv", "glColor4s", "glColor4sv", "glColor4ub", "glColor4ubv", "glColor4ui", "glColor4uiv", "glColor4us", "glColor4usv", "glColorMask", "glColorMaterial",
 				"glColorPointer", "glCopyPixels", "glCopyTexImage1D", "glCopyTexImage2D", "glCopyTexSubImage1D", "glCopyTexSubImage2D", "glCullFaceglCullFace", "glDeleteLists", "glDeleteTextures",
 				"glDepthFunc", "glDepthMask", "glDepthRange", "glDisable", "glDisableClientState", "glDrawArrays", "glDrawBuffer", "glDrawElements", "glDrawPixels", "glEdgeFlag", "glEdgeFlagPointer",
@@ -546,44 +538,35 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				"glEvalCoord2f", "glEvalCoord2fv", "glEvalMesh1", "glEvalMesh2", "glEvalPoint1", "glEvalPoint2", "glFeedbackBuffer", "glFinish", "glFlush", "glFogf", "glFogfv", "glFogi", "glFogiv",
 				"glFrontFace", "glFrustum", "glGenLists", "glGenTextures", "glGetBooleanv", "glGetClipPlane", "glGetDoublev", "glGetError", "glGetFloatv", "glGetIntegerv", "glGetLightfv", "glGetLightiv",
 				"glGetMapdv", "glGetMapfv", "glGetMapiv", "glGetMaterialfv", "glGetMaterialiv", "glGetPixelMapfv", "glGetPixelMapuiv", "glGetPixelMapusv", "glGetPointerv", "glGetPolygonStipple",
-				"glGetString", "glGetTexEnvfv", "glGetTexEnviv", "glGetTexGendv", "glGetTexGenfv", "glGetTexGeniv", "glGetTexImage", "glGetTexLevelParameterfv", "glGetTexLevelParameteriv", 
+				"glGetString", "glGetTexEnvfv", "glGetTexEnviv", "glGetTexGendv", "glGetTexGenfv", "glGetTexGeniv", "glGetTexImage", "glGetTexLevelParameterfv", "glGetTexLevelParameteriv",
 				"glGetTexParameterfv", "glGetTexParameteriv", "glHint", "glIndexMask", "glIndexPointer", "glIndexd", "glIndexdv", "glIndexf", "glIndexfv", "glIndexi", "glIndexiv", "glIndexs", "glIndexsv",
 				"glIndexub", "glIndexubv", "glInitNames", "glInterleavedArrays", "glIsEnabled", "glIsList", "glIsTexture", "glLightModelf", "glLightModelfv", "glLightModeli", "glLightModeliv", "glLightf",
 				"glLightfv", "glLighti", "glLightiv", "glLineStipple", "glLineWidth", "glListBase", "glLoadIdentity", "glLoadMatrixd", "glLoadMatrixf", "glLoadName", "glLogicOp", "glMap1d", "glMap1f",
-				"glMap2d", "glMap2f", "glMapGrid1d", "glMapGrid1f", "glMapGrid2d", "glMapGrid2f", "glMaterialf", "glMaterialfv", "glMateriali", "glMaterialiv", "glMatrixMode", "glMultMatrixd", 
-				"glMultMatrixf", "glNewList", "glNormal3b", "glNormal3bv", "glNormal3d", "glNormal3dv", "glNormal3f", "glNormal3fv", "glNormal3i", "glNormal3iv", "glNormal3s", "glNormal3sv", 
+				"glMap2d", "glMap2f", "glMapGrid1d", "glMapGrid1f", "glMapGrid2d", "glMapGrid2f", "glMaterialf", "glMaterialfv", "glMateriali", "glMaterialiv", "glMatrixMode", "glMultMatrixd",
+				"glMultMatrixf", "glNewList", "glNormal3b", "glNormal3bv", "glNormal3d", "glNormal3dv", "glNormal3f", "glNormal3fv", "glNormal3i", "glNormal3iv", "glNormal3s", "glNormal3sv",
 				"glNormalPointer", "glOrtho", "glPassThrough", "glPixelMapfv", "glPixelMapuiv", "glPixelMapusv", "glPixelStoref", "glPixelStorei", "glPixelTransferf", "glPixelTransferi", "glPixelZoom",
-				"glPointSize", "glPolygonMode", "glPolygonOffset", "glPolygonStipple", "glPopAttrib", "glPopClientAttrib", "glPopMatrix", "glPopName", "glPrioritizeTextures", "glPushAttrib", 
-				"glPushClientAttrib", "glPushMatrix", "glPushName", "glRasterPos2d", "glRasterPos2dv", "glRasterPos2f", "glRasterPos2fv", "glRasterPos2i", "glRasterPos2iv", "glRasterPos2s", 
-				"glRasterPos2sv", "glRasterPos3d", "glRasterPos3dv", "glRasterPos3f", "glRasterPos3fv", "glRasterPos3i", "glRasterPos3iv", "glRasterPos3s", "glRasterPos3sv", "glRasterPos4d", 
+				"glPointSize", "glPolygonMode", "glPolygonOffset", "glPolygonStipple", "glPopAttrib", "glPopClientAttrib", "glPopMatrix", "glPopName", "glPrioritizeTextures", "glPushAttrib",
+				"glPushClientAttrib", "glPushMatrix", "glPushName", "glRasterPos2d", "glRasterPos2dv", "glRasterPos2f", "glRasterPos2fv", "glRasterPos2i", "glRasterPos2iv", "glRasterPos2s",
+				"glRasterPos2sv", "glRasterPos3d", "glRasterPos3dv", "glRasterPos3f", "glRasterPos3fv", "glRasterPos3i", "glRasterPos3iv", "glRasterPos3s", "glRasterPos3sv", "glRasterPos4d",
 				"glRasterPos4dv", "glRasterPos4f", "glRasterPos4fv", "glRasterPos4i", "glRasterPos4iv", "glRasterPos4s", "glRasterPos4sv", "glReadBuffer", "glReadPixels", "glRectd", "glRectdv", "glRectf",
 				"glRectfv", "glRecti", "glRectiv", "glRects", "glRectsv", "glRenderMode", "glRotated", "glRotatef", "glScaled", "glScalef", "glScissor", "glSelectBuffer", "glShadeModel", "glStencilFunc",
-				"glStencilMask", "glStencilOp", "glTexCoord1d", "glTexCoord1dv", "glTexCoord1f", "glTexCoord1fv", "glTexCoord1i", "glTexCoord1iv", "glTexCoord1s", "glTexCoord1sv", "glTexCoord2d", 
-				"glTexCoord2dv", "glTexCoord2f", "glTexCoord2fv", "glTexCoord2i", "glTexCoord2iv", "glTexCoord2s", "glTexCoord2sv", "glTexCoord3d", "glTexCoord3dv", "glTexCoord3f", "glTexCoord3fv", 
-				"glTexCoord3i", "glTexCoord3iv", "glTexCoord3s", "glTexCoord3sv", "glTexCoord4d", "glTexCoord4dv", "glTexCoord4f", "glTexCoord4fv", "glTexCoord4i", "glTexCoord4iv", "glTexCoord4s", 
+				"glStencilMask", "glStencilOp", "glTexCoord1d", "glTexCoord1dv", "glTexCoord1f", "glTexCoord1fv", "glTexCoord1i", "glTexCoord1iv", "glTexCoord1s", "glTexCoord1sv", "glTexCoord2d",
+				"glTexCoord2dv", "glTexCoord2f", "glTexCoord2fv", "glTexCoord2i", "glTexCoord2iv", "glTexCoord2s", "glTexCoord2sv", "glTexCoord3d", "glTexCoord3dv", "glTexCoord3f", "glTexCoord3fv",
+				"glTexCoord3i", "glTexCoord3iv", "glTexCoord3s", "glTexCoord3sv", "glTexCoord4d", "glTexCoord4dv", "glTexCoord4f", "glTexCoord4fv", "glTexCoord4i", "glTexCoord4iv", "glTexCoord4s",
 				"glTexCoord4sv", "glTexCoordPointer", "glTexEnvf", "glTexEnvfv", "glTexEnvi", "glTexEnviv", "glTexGend", "glTexGendv", "glTexGenf", "glTexGenfv", "glTexGeni", "glTexGeniv", "glTexImage1D",
-				"glTexImage2D", "glTexParameterf", "glTexParameterfv", "glTexParameteri", "glTexParameteriv", "glTexSubImage1D", "glTexSubImage2D", "glTranslated", "glTranslatef", "glVertex2d", 
+				"glTexImage2D", "glTexParameterf", "glTexParameterfv", "glTexParameteri", "glTexParameteriv", "glTexSubImage1D", "glTexSubImage2D", "glTranslated", "glTranslatef", "glVertex2d",
 				"glVertex2dv", "glVertex2f", "glVertex2fv", "glVertex2i", "glVertex2iv", "glVertex2s", "glVertex2sv", "glVertex3d", "glVertex3dv", "glVertex3f", "glVertex3fv", "glVertex3i", "glVertex3iv",
 				"glVertex3s", "glVertex3sv", "glVertex4d", "glVertex4dv", "glVertex4f", "glVertex4fv", "glVertex4i", "glVertex4iv", "glVertex4s", "glVertex4sv", "glVertexPointer", "glViewport"
 			};
 
 			size_t size = KIERO_ARRAY_SIZE(methodsNames);
 
-#if KIERO_ARCH_X64
-			g_methodsTable = (uint64_t*)::calloc(size, sizeof(uint64_t));
+			g_methodsTable = (uint150_t*)::calloc(size, sizeof(uint150_t));
 
 			for (int i = 0; i < size; i++)
 			{
-				g_methodsTable[i] = (uint64_t)::GetProcAddress(libOpenGL32, methodsNames[i]);
+				g_methodsTable[i] = (uint150_t)::GetProcAddress(libOpenGL32, methodsNames[i]);
 			}
-#else
-			g_methodsTable = (uint32_t*)::calloc(size, sizeof(uint32_t));
-
-			for (int i = 0; i < size; i++)
-			{
-				g_methodsTable[i] = (uint32_t)::GetProcAddress(libOpenGL32, methodsNames[i]);
-			}
-#endif
 
 #ifdef KIERO_USE_MINHOOK
 			MH_Initialize();
@@ -592,31 +575,31 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 			g_renderType = RenderType::OpenGL;
 
 			return Status::Success;
-#endif // __gl_h_
+#endif
 		}
-		else if (_renderType == RenderType::Vulkan) 
+		else if (_renderType == RenderType::Vulkan)
 		{
-#ifdef VULKAN_H_
+#if KIERO_INCLUDE_VULKAN
 			HMODULE libVulkan;
 			if ((libVulkan = GetModuleHandle(KIERO_TEXT("vulcan-1.dll"))) == NULL)
 			{
 				return Status::ModuleNotFoundError;
 			}
 
-			const char* const methodsNames[] = { 
+			const char* const methodsNames[] = {
 				"vkCreateInstance", "vkDestroyInstance", "vkEnumeratePhysicalDevices", "vkGetPhysicalDeviceFeatures", "vkGetPhysicalDeviceFormatProperties", "vkGetPhysicalDeviceImageFormatProperties",
 				"vkGetPhysicalDeviceProperties", "vkGetPhysicalDeviceQueueFamilyProperties", "vkGetPhysicalDeviceMemoryProperties", "vkGetInstanceProcAddr", "vkGetDeviceProcAddr", "vkCreateDevice",
 				"vkDestroyDevice", "vkEnumerateInstanceExtensionProperties", "vkEnumerateDeviceExtensionProperties", "vkEnumerateDeviceLayerProperties", "vkGetDeviceQueue", "vkQueueSubmit", "vkQueueWaitIdle",
-				"vkDeviceWaitIdle", "vkAllocateMemory", "vkFreeMemory", "vkMapMemory", "vkUnmapMemory", "vkFlushMappedMemoryRanges", "vkInvalidateMappedMemoryRanges", "vkGetDeviceMemoryCommitment", 
+				"vkDeviceWaitIdle", "vkAllocateMemory", "vkFreeMemory", "vkMapMemory", "vkUnmapMemory", "vkFlushMappedMemoryRanges", "vkInvalidateMappedMemoryRanges", "vkGetDeviceMemoryCommitment",
 				"vkBindBufferMemory", "vkBindImageMemory", "vkGetBufferMemoryRequirements", "vkGetImageMemoryRequirements", "vkGetImageSparseMemoryRequirements", "vkGetPhysicalDeviceSparseImageFormatProperties",
-				"vkQueueBindSparse", "vkCreateFence", "vkDestroyFence", "vkResetFences", "vkGetFenceStatus", "vkWaitForFences", "vkCreateSemaphore", "vkDestroySemaphore", "vkCreateEvent", "vkDestroyEvent", 
+				"vkQueueBindSparse", "vkCreateFence", "vkDestroyFence", "vkResetFences", "vkGetFenceStatus", "vkWaitForFences", "vkCreateSemaphore", "vkDestroySemaphore", "vkCreateEvent", "vkDestroyEvent",
 				"vkGetEventStatus", "vkSetEvent", "vkResetEvent", "vkCreateQueryPool", "vkDestroyQueryPool", "vkGetQueryPoolResults", "vkCreateBuffer", "vkDestroyBuffer", "vkCreateBufferView", "vkDestroyBufferView",
-				"vkCreateImage", "vkDestroyImage", "vkGetImageSubresourceLayout", "vkCreateImageView", "vkDestroyImageView", "vkCreateShaderModule", "vkDestroyShaderModule", "vkCreatePipelineCache", 
-				"vkDestroyPipelineCache", "vkGetPipelineCacheData", "vkMergePipelineCaches", "vkCreateGraphicsPipelines", "vkCreateComputePipelines", "vkDestroyPipeline", "vkCreatePipelineLayout", 
+				"vkCreateImage", "vkDestroyImage", "vkGetImageSubresourceLayout", "vkCreateImageView", "vkDestroyImageView", "vkCreateShaderModule", "vkDestroyShaderModule", "vkCreatePipelineCache",
+				"vkDestroyPipelineCache", "vkGetPipelineCacheData", "vkMergePipelineCaches", "vkCreateGraphicsPipelines", "vkCreateComputePipelines", "vkDestroyPipeline", "vkCreatePipelineLayout",
 				"vkDestroyPipelineLayout", "vkCreateSampler", "vkDestroySampler", "vkCreateDescriptorSetLayout", "vkDestroyDescriptorSetLayout", "vkCreateDescriptorPool", "vkDestroyDescriptorPool",
 				"vkResetDescriptorPool", "vkAllocateDescriptorSets", "vkFreeDescriptorSets", "vkUpdateDescriptorSets", "vkCreateFramebuffer", "vkDestroyFramebuffer", "vkCreateRenderPass", "vkDestroyRenderPass",
 				"vkGetRenderAreaGranularity", "vkCreateCommandPool", "vkDestroyCommandPool", "vkResetCommandPool", "vkAllocateCommandBuffers", "vkFreeCommandBuffers", "vkBeginCommandBuffer", "vkEndCommandBuffer",
-				"vkResetCommandBuffer", "vkCmdBindPipeline", "vkCmdSetViewport", "vkCmdSetScissor", "vkCmdSetLineWidth", "vkCmdSetDepthBias", "vkCmdSetBlendConstants", "vkCmdSetDepthBounds", 
+				"vkResetCommandBuffer", "vkCmdBindPipeline", "vkCmdSetViewport", "vkCmdSetScissor", "vkCmdSetLineWidth", "vkCmdSetDepthBias", "vkCmdSetBlendConstants", "vkCmdSetDepthBounds",
 				"vkCmdSetStencilCompareMask", "vkCmdSetStencilWriteMask", "vkCmdSetStencilReference", "vkCmdBindDescriptorSets", "vkCmdBindIndexBuffer", "vkCmdBindVertexBuffers", "vkCmdDraw", "vkCmdDrawIndexed",
 				"vkCmdDrawIndirect", "vkCmdDrawIndexedIndirect", "vkCmdDispatch", "vkCmdDispatchIndirect", "vkCmdCopyBuffer", "vkCmdCopyImage", "vkCmdBlitImage", "vkCmdCopyBufferToImage", "vkCmdCopyImageToBuffer",
 				"vkCmdUpdateBuffer", "vkCmdFillBuffer", "vkCmdClearColorImage", "vkCmdClearDepthStencilImage", "vkCmdClearAttachments", "vkCmdResolveImage", "vkCmdSetEvent", "vkCmdResetEvent", "vkCmdWaitEvents",
@@ -626,21 +609,12 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 
 			size_t size = KIERO_ARRAY_SIZE(methodsNames);
 
-#if KIERO_ARCH_X64
-			g_methodsTable = (uint64_t*)::calloc(size, sizeof(uint64_t));
+			g_methodsTable = (uint150_t*)::calloc(size, sizeof(uint150_t));
 
 			for (int i = 0; i < size; i++)
 			{
-				g_methodsTable[i] = (uint64_t)::GetProcAddress(libVulkan, methodsNames[i]);
+				g_methodsTable[i] = (uint150_t)::GetProcAddress(libVulkan, methodsNames[i]);
 			}
-#else
-			g_methodsTable = (uint32_t*)::calloc(size, sizeof(uint32_t));
-
-			for (int i = 0; i < size; i++)
-			{
-				g_methodsTable[i] = (uint32_t)::GetProcAddress(libVulkan, methodsNames[i]);
-			}
-#endif
 
 #ifdef KIERO_USE_MINHOOK
 			MH_Initialize();
@@ -649,10 +623,39 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 			g_renderType = RenderType::Vulkan;
 
 			return Status::Success;
-#endif // VULKAN_H_
+#endif
 		}
+		else if (_renderType == RenderType::Auto)
+		{
+			RenderType::Enum type = RenderType::None;
 
-		return Status::NotSupportedError;
+			if (::GetModuleHandle(KIERO_TEXT("d3d9.dll")) != NULL)
+			{
+				type = RenderType::D3D9;
+			}
+			else if (::GetModuleHandle(KIERO_TEXT("d3d10.dll")) != NULL)
+			{
+				type = RenderType::D3D10;
+			}
+			else if (::GetModuleHandle(KIERO_TEXT("d3d11.dll")) != NULL)
+			{
+				type = RenderType::D3D11;
+			}
+			else if (::GetModuleHandle(KIERO_TEXT("d3d12.dll")) != NULL)
+			{
+				type = RenderType::D3D12;
+			}
+			else if (::GetModuleHandle(KIERO_TEXT("opengl32.dll")) != NULL)
+			{
+				type = RenderType::OpenGL;
+			}
+			else if (::GetModuleHandle(KIERO_TEXT("vulcan-1.dll")) != NULL)
+			{
+				type = RenderType::Vulkan;
+			}
+
+			return init(type);
+		}
 	}
 
 	return Status::Success;
@@ -660,10 +663,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 
 void kiero::shutdown()
 {
-	if (g_renderType > 0)
+	if (g_renderType != RenderType::None)
 	{
-#ifdef KIERO_USE_MINHOOK
-		MH_Uninitialize();
+#if KIERO_USE_MINHOOK
+		MH_DisableHook(MH_ALL_HOOKS);
 #endif
 
 		::free(g_methodsTable);
@@ -672,32 +675,46 @@ void kiero::shutdown()
 	}
 }
 
+kiero::Status::Enum kiero::bind(uint16_t _index, void** _original, void* _function)
+{
+	// TODO: Need own detour function
+
+	assert(_index >= 0 && _original != NULL && _function != NULL);
+
+	if (g_renderType != RenderType::None)
+	{
+#if KIERO_USE_MINHOOK
+		void* target = (void*)g_methodsTable[_index];
+		if (MH_CreateHook(target, _function, _original) != MH_OK || MH_EnableHook(target) != MH_OK)
+		{
+			return Status::UnknownError;
+		}
+#endif
+
+		return Status::Success;
+	}
+
+	return Status::NotInitializedError;
+}
+
+void kiero::unbind(uint16_t _index)
+{
+	assert(_index >= 0);
+
+	if (g_renderType != RenderType::None)
+	{
+#if KIERO_USE_MINHOOK
+		MH_DisableHook((void*)g_methodsTable[_index]);
+#endif
+	}
+}
+
 kiero::RenderType::Enum kiero::getRenderType()
 {
 	return g_renderType;
 }
 
-#if KIERO_ARCH_X64
-uint64_t* kiero::getMethodsTable()
+uint150_t* kiero::getMethodsTable()
 {
 	return g_methodsTable;
-}
-#else
-uint32_t* kiero::getMethodsTable()
-{
-	return g_methodsTable;
-}
-#endif
-
-void kiero::bind(uint16_t _index, void** _original, void* _function)
-{
-	// TODO: Need own detour function
-
-#ifdef KIERO_USE_MINHOOK
-	if (g_renderType > 0)
-	{
-		MH_CreateHook((void*)g_methodsTable[_index], _function, _original);
-		MH_EnableHook((void*)g_methodsTable[_index]);
-	}
-#endif
-}
+} 

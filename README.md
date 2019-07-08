@@ -11,32 +11,50 @@
 </p>
 
 ### Requirement
-[Windows SDK](https://www.microsoft.com/en-us/download/details.aspx?id=8279) or [DirectX SDK](https://www.microsoft.com/en-us/download/details.aspx?id=4064) (If you need d3d9-d3d12 and opengl hooks)
+[Windows SDK](https://www.microsoft.com/en-us/download/details.aspx?id=8279) (For D3D9/D3D10/D3D11/OpenGL hook)
 
-[Vulcan SDK](https://www.lunarg.com/vulkan-sdk) (If you need vulkan hook)
+[DirectX SDK](https://www.microsoft.com/en-us/download/details.aspx?id=4064) (For D3D9/D3D10/D3D11 hook)
+
+[Vulkan SDK](https://www.lunarg.com/vulkan-sdk) (For Vulkan hook)
+
+[MinHook](https://github.com/TsudaKageyu/minhook) (For kiero::bind function)
 
 ### Example
-Before we begin, **we need to uncomment the required header of graphical library in kiero.cpp**
-
-In kiero there is a methods table which contains addresses of graphic functions. **To get the method you want, find it in METHODSTABLE.txt**
-
+To start, go to the kiero.h and select the desired hooks
 ```C++
+// Example for D3D9 hook
+#define KIERO_INCLUDE_D3D9   1 // 1 if you need D3D9 hook
+#define KIERO_INCLUDE_D3D10  0 // 1 if you need D3D10 hook
+#define KIERO_INCLUDE_D3D11  0 // 1 if you need D3D11 hook
+#define KIERO_INCLUDE_D3D12  0 // 1 if you need D3D12 hook
+#define KIERO_INCLUDE_OPENGL 0 // 1 if you need OpenGL hook
+#define KIERO_INCLUDE_VULKAN 0 // 1 if you need Vulkan hook
+```
+
+Then proceed to the main work
+```C++
+// Example for D3D9 hook
+
+// Include required libraries
 #include "kiero.h"
 #include <d3d9.h>
-#include <MinHook.h>
 #include <Windows.h>
 
+// Create the type of function that we will hook
 typedef long(__stdcall* EndScene)(LPDIRECT3DDEVICE9);
-EndScene oEndScene = NULL;
+static EndScene oEndScene = NULL;
 
+// Declare the detour function
 long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 {
-  static bool init = false;
-  if (!init)
-  {
-    MessageBox(0, "Boom! It's works!", "Kiero", MB_OK);
-    init = true;
-  }
+  // ... Your magic here ...
+  
+  // static bool init = false;
+  // if (!init)
+  // {
+  //  MessageBox(0, "Boom! It's works!", "Kiero", MB_OK);
+  //  init = true;
+  // }
   
   return oEndScene(pDevice);
 }
@@ -44,10 +62,17 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 int kieroExampleThread()
 {
   if (kiero::init(kiero::RenderType::D3D9) == kiero::Status::Success)
+  // or
+  if (kiero::init(kiero::RenderType::Auto) == kiero::Status::Success)
   {
+    // define KIERO_USE_MINHOOK must be 1
+    // the index of the required function can be found in the METHODSTABLE.txt
     kiero::bind(42, (void**)&oEndScene, hkEndScene);
+    
+    // If you just need to get the function address you can use the kiero::getMethodsTable function
+    oEndScene = (EndScene)kiero::kiero::getMethodsTable()[42];
   }
-  
+
   return 0;
 }
 
@@ -64,6 +89,7 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD fdwReason, LPVOID)
 
   return TRUE;
 }
+
 ```
 
 ### Contributors
