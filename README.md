@@ -70,7 +70,7 @@ int kieroExampleThread()
     kiero::bind(42, (void**)&oEndScene, hkEndScene);
     
     // If you just need to get the function address you can use the kiero::getMethodsTable function
-    oEndScene = (EndScene)kiero::kiero::getMethodsTable()[42];
+    oEndScene = (EndScene)kiero::getMethodsTable()[42];
   }
 
   return 0;
