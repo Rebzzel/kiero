@@ -20,7 +20,7 @@
 [MinHook](https://github.com/TsudaKageyu/minhook) (For kiero::bind function)
 
 ### Example
-To start, go to the kiero.h and select the desired hooks
+To start, select the desired hooks and then proceed to the main work
 ```C++
 // Example for D3D9 hook
 #define KIERO_INCLUDE_D3D9   1 // 1 if you need D3D9 hook
@@ -29,11 +29,6 @@ To start, go to the kiero.h and select the desired hooks
 #define KIERO_INCLUDE_D3D12  0 // 1 if you need D3D12 hook
 #define KIERO_INCLUDE_OPENGL 0 // 1 if you need OpenGL hook
 #define KIERO_INCLUDE_VULKAN 0 // 1 if you need Vulkan hook
-```
-
-Then proceed to the main work
-```C++
-// Example for D3D9 hook
 
 // Include required libraries
 #include "kiero.h"

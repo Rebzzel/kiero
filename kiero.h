@@ -5,13 +5,33 @@
 
 #define KIERO_VERSION "1.2.6"
 
+#ifndef KIERO_INCLUDE_D3D9
 #define KIERO_INCLUDE_D3D9   0 // 1 if you need D3D9 hook
+#endif
+
+#ifndef KIERO_INCLUDE_D3D10
 #define KIERO_INCLUDE_D3D10  0 // 1 if you need D3D10 hook
+#endif
+
+#ifndef KIERO_INCLUDE_D3D11
 #define KIERO_INCLUDE_D3D11  0 // 1 if you need D3D11 hook
+#endif
+
+#ifndef KIERO_INCLUDE_D3D12
 #define KIERO_INCLUDE_D3D12  0 // 1 if you need D3D12 hook
+#endif
+
+#ifndef KIERO_INCLUDE_OPENGL
 #define KIERO_INCLUDE_OPENGL 0 // 1 if you need OpenGL hook
+#endif
+
+#ifndef KIERO_INCLUDE_VULKAN
 #define KIERO_INCLUDE_VULKAN 0 // 1 if you need Vulkan hook
+#endif
+
+#ifndef KIERO_USE_MINHOOK
 #define KIERO_USE_MINHOOK    0 // 1 if you will use kiero::bind function
+#endif
 
 #define KIERO_ARCH_X64 0
 #define KIERO_ARCH_X86 0
