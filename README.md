@@ -65,12 +65,21 @@ int kieroExampleThread()
   // or
   if (kiero::init(kiero::RenderType::Auto) == kiero::Status::Success)
   {
+    // If you are using RenderType::Auto, you can check 
+    // whether the desired type is being used using kiero::getRenderType function
+    if (kiero::getRenderType() != kiero::RenderType::D3D9)
+    {
+      return 2;
+    }
+    
     // define KIERO_USE_MINHOOK must be 1
     // the index of the required function can be found in the METHODSTABLE.txt
     kiero::bind(42, (void**)&oEndScene, hkEndScene);
     
     // If you just need to get the function address you can use the kiero::getMethodsTable function
     oEndScene = (EndScene)kiero::getMethodsTable()[42];
+    
+    return 1;
   }
 
   return 0;
