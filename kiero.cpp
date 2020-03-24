@@ -688,7 +688,7 @@ kiero::Status::Enum kiero::bind(uint16_t _index, void** _original, void* _functi
 {
 	// TODO: Need own detour function
 
-	assert(_index >= 0 && _original != NULL && _function != NULL);
+	assert(_original != NULL && _function != NULL);
 
 	if (g_renderType != RenderType::None)
 	{
@@ -708,8 +708,6 @@ kiero::Status::Enum kiero::bind(uint16_t _index, void** _original, void* _functi
 
 void kiero::unbind(uint16_t _index)
 {
-	assert(_index >= 0);
-
 	if (g_renderType != RenderType::None)
 	{
 #if KIERO_USE_MINHOOK
