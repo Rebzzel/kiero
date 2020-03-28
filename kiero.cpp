@@ -329,11 +329,42 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 					IDXGISwapChain**,
 					ID3D11Device**,
 					D3D_FEATURE_LEVEL*,
-					ID3D11DeviceContext**))(D3D11CreateDeviceAndSwapChain))(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, featureLevels, 1, D3D11_SDK_VERSION, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
+					ID3D11DeviceContext**))(D3D11CreateDeviceAndSwapChain))(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, NULL, 0, D3D11_SDK_VERSION, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
 				{
-					::DestroyWindow(window);
-					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
-					return Status::UnknownError;
+					D3D_FEATURE_LEVEL backupFeatureLevel = D3D_FEATURE_LEVEL_11_0;
+					if (((long(__stdcall*)(
+						IDXGIAdapter*,
+						D3D_DRIVER_TYPE,
+						HMODULE,
+						UINT,
+						const D3D_FEATURE_LEVEL*,
+						UINT,
+						UINT,
+						const DXGI_SWAP_CHAIN_DESC*,
+						IDXGISwapChain**,
+						ID3D11Device**,
+						D3D_FEATURE_LEVEL*,
+						ID3D11DeviceContext**))(D3D11CreateDeviceAndSwapChain))(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &backupFeatureLevel, 1, D3D11_SDK_VERSION, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
+					{
+						if (((long(__stdcall*)(
+							IDXGIAdapter*,
+							D3D_DRIVER_TYPE,
+							HMODULE,
+							UINT,
+							const D3D_FEATURE_LEVEL*,
+							UINT,
+							UINT,
+							const DXGI_SWAP_CHAIN_DESC*,
+							IDXGISwapChain**,
+							ID3D11Device**,
+							D3D_FEATURE_LEVEL*,
+							ID3D11DeviceContext**))(D3D11CreateDeviceAndSwapChain))(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, NULL, 0, D3D11_SDK_VERSION, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
+						{
+							::DestroyWindow(window);
+							::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+							return Status::UnknownError;
+						}
+					}
 				}
 
 				g_methodsTable = (uint150_t*)::calloc(205, sizeof(uint150_t));
