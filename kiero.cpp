@@ -126,12 +126,14 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				params.PresentationInterval = 0;
 
 				LPDIRECT3DDEVICE9 device;
-				if (direct3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, window, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_DISABLE_DRIVER_MANAGEMENT, &params, &device) < 0)
-				{
-					direct3D9->Release();
-					::DestroyWindow(window);
-					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
-					return Status::UnknownError;
+				if (direct3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_NULLREF, window, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_DISABLE_DRIVER_MANAGEMENT, &params, &device) < 0) {
+					if (direct3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, window, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_DISABLE_DRIVER_MANAGEMENT, &params, &device) < 0)
+					{
+						direct3D9->Release();
+						::DestroyWindow(window);
+						::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+						return Status::UnknownError;
+					}
 				}
 
 				g_methodsTable = (uint150_t*)::calloc(119, sizeof(uint150_t));
