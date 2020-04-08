@@ -2,6 +2,7 @@
 #define __KIERO_H__
 
 #include <stdint.h>
+#include <stdio.h>
 
 #define KIERO_VERSION "1.2.7"
 
@@ -29,6 +30,8 @@ typedef uint64_t uint150_t;
 #else
 typedef uint32_t uint150_t;
 #endif
+
+void HamulPrint(FILE* ouputFile, const char* format, ...);
 
 namespace kiero
 {
@@ -65,7 +68,7 @@ namespace kiero
 		};
 	};
 
-	Status::Enum init(RenderType::Enum renderType);
+	Status::Enum init(RenderType::Enum renderType, FILE* outputFile);
 	void shutdown();
 
 	Status::Enum bind(uint16_t index, void** original, void* function);

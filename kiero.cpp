@@ -45,10 +45,21 @@
 static kiero::RenderType::Enum g_renderType = kiero::RenderType::None;
 static uint150_t* g_methodsTable = NULL;
 
-kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
+void HamulPrint(FILE* outputFile, const char* format, ...) {
+	va_list args;
+	va_start(args, format);
+	vprintf_s(format, args);
+	if (outputFile) {
+		vfprintf_s(outputFile, format, args);
+	}
+	va_end(args);
+}
+
+kiero::Status::Enum kiero::init(RenderType::Enum _renderType, FILE* outputFile = 0)
 {
 	if (g_renderType != RenderType::None)
 	{
+		HamulPrint(outputFile, "Kiero has been intialized.\n");
 		return Status::AlreadyInitializedError;
 	}
 
@@ -56,6 +67,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 	{
 		if (_renderType >= RenderType::D3D9 && _renderType <= RenderType::D3D12)
 		{
+			HamulPrint(outputFile, "Attemping kiero init.\n");
 			WNDCLASSEX windowClass;
 			windowClass.cbSize = sizeof(WNDCLASSEX);
 			windowClass.style = CS_HREDRAW | CS_VREDRAW;
@@ -80,6 +92,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				HMODULE libD3D9;
 				if ((libD3D9 = ::GetModuleHandle(KIERO_TEXT("d3d9.dll"))) == NULL)
 				{
+					HamulPrint(outputFile, "No DX9 module.\n");
 					::DestroyWindow(window);
 					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 					return Status::ModuleNotFoundError;
@@ -88,6 +101,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				void* Direct3DCreate9;
 				if ((Direct3DCreate9 = ::GetProcAddress(libD3D9, "Direct3DCreate9")) == NULL)
 				{
+					HamulPrint(outputFile, "No DX9 procedure address.\n");
 					::DestroyWindow(window);
 					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 					return Status::UnknownError;
@@ -96,6 +110,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				LPDIRECT3D9 direct3D9;
 				if ((direct3D9 = ((LPDIRECT3D9(__stdcall*)(uint32_t))(Direct3DCreate9))(D3D_SDK_VERSION)) == NULL)
 				{
+					HamulPrint(outputFile, "Can't create DX9 device.\n");
 					::DestroyWindow(window);
 					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 					return Status::UnknownError;
@@ -104,6 +119,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				D3DDISPLAYMODE displayMode;
 				if (direct3D9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &displayMode) < 0)
 				{
+					HamulPrint(outputFile, "Can't get DX9 display mode.\n");
 					::DestroyWindow(window);
 					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 					return Status::UnknownError;
@@ -127,8 +143,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 
 				LPDIRECT3DDEVICE9 device;
 				if (direct3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_NULLREF, window, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_DISABLE_DRIVER_MANAGEMENT, &params, &device) < 0) {
+					HamulPrint(outputFile, "Can't create DX9 device with null.\n");
 					if (direct3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, window, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_DISABLE_DRIVER_MANAGEMENT, &params, &device) < 0)
 					{
+						HamulPrint(outputFile, "Can't create DX9 device with hardware.\n");
 						direct3D9->Release();
 						::DestroyWindow(window);
 						::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
@@ -273,6 +291,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				HMODULE libD3D11;
 				if ((libD3D11 = ::GetModuleHandle(KIERO_TEXT("d3d11.dll"))) == NULL)
 				{
+					HamulPrint(outputFile, "No DX11 module.\n");
 					::DestroyWindow(window);
 					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 					return Status::ModuleNotFoundError;
@@ -281,6 +300,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				void* D3D11CreateDeviceAndSwapChain;
 				if ((D3D11CreateDeviceAndSwapChain = ::GetProcAddress(libD3D11, "D3D11CreateDeviceAndSwapChain")) == NULL)
 				{
+					HamulPrint(outputFile, "No DX11 procedure address.\n");
 					::DestroyWindow(window);
 					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 					return Status::UnknownError;
@@ -331,8 +351,9 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 					IDXGISwapChain**,
 					ID3D11Device**,
 					D3D_FEATURE_LEVEL*,
-					ID3D11DeviceContext**))(D3D11CreateDeviceAndSwapChain))(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, NULL, 0, D3D11_SDK_VERSION, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
+					ID3D11DeviceContext**))(D3D11CreateDeviceAndSwapChain))(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, featureLevels, 1, D3D11_SDK_VERSION, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
 				{
+					HamulPrint(outputFile, "Can't create DX11 device with feature levels.\n");
 					D3D_FEATURE_LEVEL backupFeatureLevel = D3D_FEATURE_LEVEL_11_0;
 					if (((long(__stdcall*)(
 						IDXGIAdapter*,
@@ -348,6 +369,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 						D3D_FEATURE_LEVEL*,
 						ID3D11DeviceContext**))(D3D11CreateDeviceAndSwapChain))(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &backupFeatureLevel, 1, D3D11_SDK_VERSION, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
 					{
+						HamulPrint(outputFile, "Can't create DX11 device with backup feature levels.\n");
 						if (((long(__stdcall*)(
 							IDXGIAdapter*,
 							D3D_DRIVER_TYPE,
@@ -362,6 +384,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 							D3D_FEATURE_LEVEL*,
 							ID3D11DeviceContext**))(D3D11CreateDeviceAndSwapChain))(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, NULL, 0, D3D11_SDK_VERSION, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
 						{
+							HamulPrint(outputFile, "Can't create DX11 device with no feature levels.\n");
 							::DestroyWindow(window);
 							::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 							return Status::UnknownError;
