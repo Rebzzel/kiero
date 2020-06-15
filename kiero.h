@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <d3d11.h>
 
 #define KIERO_VERSION "1.2.7"
 
@@ -32,6 +33,9 @@ typedef uint32_t uint150_t;
 #endif
 
 void HamulPrint(FILE* ouputFile, const char* format, ...);
+long CreateDX11DeviceAndSwapChain(void* D3D11CreateDeviceAndSwapChain, D3D_DRIVER_TYPE driverType,
+	const D3D_FEATURE_LEVEL* featureLevels, UINT featureLevelsCount, DXGI_SWAP_CHAIN_DESC* swapChainDesc,
+	IDXGISwapChain** swapChain, ID3D11Device** device, D3D_FEATURE_LEVEL* featureLevel, ID3D11DeviceContext** context);
 
 namespace kiero
 {
@@ -68,7 +72,7 @@ namespace kiero
 		};
 	};
 
-	Status::Enum init(RenderType::Enum renderType, FILE* outputFile);
+	Status::Enum init(RenderType::Enum renderType, FILE* outputFile, int attempt);
 	void shutdown();
 
 	Status::Enum bind(uint16_t index, void** original, void* function);
