@@ -74,7 +74,7 @@ long CreateDX11DeviceAndSwapChain(void* D3D11CreateDeviceAndSwapChain, D3D_DRIVE
 		ID3D11DeviceContext**))(D3D11CreateDeviceAndSwapChain))(NULL, driverType, NULL, 0, featureLevels, featureLevelsCount, D3D11_SDK_VERSION, swapChainDesc, swapChain, device, featureLevel, context);
 }
 
-kiero::Status::Enum kiero::init(RenderType::Enum _renderType, FILE* outputFile = 0, int attempt = 0)
+kiero::Status::Enum kiero::init(RenderType::Enum _renderType, FILE* outputFile = 0, int attempts = 0)
 {
 	if (g_renderType != RenderType::None)
 	{
@@ -358,23 +358,20 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType, FILE* outputFile =
 				ID3D11Device* device;
 				ID3D11DeviceContext* context;
 
-				if (CreateDX11DeviceAndSwapChain(D3D11CreateDeviceAndSwapChain, D3D_DRIVER_TYPE_REFERENCE, featureLevels, 1, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
+				D3D_DRIVER_TYPE driverType = attempts % 2 == 0 ? D3D_DRIVER_TYPE_REFERENCE : D3D_DRIVER_TYPE_HARDWARE;
+				if (CreateDX11DeviceAndSwapChain(D3D11CreateDeviceAndSwapChain, driverType, featureLevels, 1, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
 				{
-					HamulPrint(outputFile, "Can't create DX11 device with reference driver.\n");
-					if (CreateDX11DeviceAndSwapChain(D3D11CreateDeviceAndSwapChain, D3D_DRIVER_TYPE_HARDWARE, featureLevels, 1, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
+					HamulPrint(outputFile, "Can't create DX11 device with %s driver.\n", driverType == D3D_DRIVER_TYPE_REFERENCE ? "reference" : "feature");
+					D3D_FEATURE_LEVEL backupFeatureLevel = D3D_FEATURE_LEVEL_11_0;
+					if (CreateDX11DeviceAndSwapChain(D3D11CreateDeviceAndSwapChain, D3D_DRIVER_TYPE_HARDWARE, &backupFeatureLevel, 1, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
 					{
-						HamulPrint(outputFile, "Can't create DX11 device with feature levels.\n");
-						D3D_FEATURE_LEVEL backupFeatureLevel = D3D_FEATURE_LEVEL_11_0;
-						if (CreateDX11DeviceAndSwapChain(D3D11CreateDeviceAndSwapChain, D3D_DRIVER_TYPE_HARDWARE, &backupFeatureLevel, 1, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
+						HamulPrint(outputFile, "Can't create DX11 device with backup feature levels.\n");
+						if (CreateDX11DeviceAndSwapChain(D3D11CreateDeviceAndSwapChain, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
 						{
-							HamulPrint(outputFile, "Can't create DX11 device with backup feature levels.\n");
-							if (CreateDX11DeviceAndSwapChain(D3D11CreateDeviceAndSwapChain, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
-							{
-								HamulPrint(outputFile, "Can't create DX11 device with no feature levels.\n");
-								::DestroyWindow(window);
-								::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
-								return Status::UnknownError;
-							}
+							HamulPrint(outputFile, "Can't create DX11 device with no feature levels.\n");
+							::DestroyWindow(window);
+							::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+							return Status::UnknownError;
 						}
 					}
 				}

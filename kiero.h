@@ -72,7 +72,7 @@ namespace kiero
 		};
 	};
 
-	Status::Enum init(RenderType::Enum renderType, FILE* outputFile, int attempt);
+	Status::Enum init(RenderType::Enum renderType, FILE* outputFile, int attempts);
 	void shutdown();
 
 	Status::Enum bind(uint16_t index, void** original, void* function);
