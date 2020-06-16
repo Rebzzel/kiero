@@ -583,7 +583,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 			{
 #if KIERO_INCLUDE_VULKAN
 				HMODULE libVulkan;
-				if ((libVulkan = GetModuleHandle(KIERO_TEXT("vulcan-1.dll"))) == NULL)
+				if ((libVulkan = GetModuleHandle(KIERO_TEXT("vulkan-1.dll"))) == NULL)
 				{
 					return Status::ModuleNotFoundError;
 				}
@@ -654,7 +654,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 			{
 				type = RenderType::OpenGL;
 			}
-			else if (::GetModuleHandle(KIERO_TEXT("vulcan-1.dll")) != NULL)
+			else if (::GetModuleHandle(KIERO_TEXT("vulkan-1.dll")) != NULL)
 			{
 				type = RenderType::Vulkan;
 			}
