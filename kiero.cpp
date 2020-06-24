@@ -359,7 +359,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType, FILE* outputFile =
 				ID3D11DeviceContext* context;
 
 				D3D_DRIVER_TYPE driverType = attempts % 2 == 0 ? D3D_DRIVER_TYPE_REFERENCE : D3D_DRIVER_TYPE_HARDWARE;
-				if (CreateDX11DeviceAndSwapChain(D3D11CreateDeviceAndSwapChain, driverType, featureLevels, 1, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
+				if (CreateDX11DeviceAndSwapChain(D3D11CreateDeviceAndSwapChain, driverType, featureLevels, 2, &swapChainDesc, &swapChain, &device, &featureLevel, &context) < 0)
 				{
 					HamulPrint(outputFile, "Can't create DX11 device with %s driver.\n", driverType == D3D_DRIVER_TYPE_REFERENCE ? "reference" : "feature");
 					D3D_FEATURE_LEVEL backupFeatureLevel = D3D_FEATURE_LEVEL_11_0;
@@ -623,7 +623,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType, FILE* outputFile =
 			{
 #if KIERO_INCLUDE_VULKAN
 				HMODULE libVulkan;
-				if ((libVulkan = GetModuleHandle(KIERO_TEXT("vulcan-1.dll"))) == NULL)
+				if ((libVulkan = GetModuleHandle(KIERO_TEXT("vulkan-1.dll"))) == NULL)
 				{
 					return Status::ModuleNotFoundError;
 				}
@@ -694,7 +694,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType, FILE* outputFile =
 			{
 				type = RenderType::OpenGL;
 			}
-			else if (::GetModuleHandle(KIERO_TEXT("vulcan-1.dll")) != NULL)
+			else if (::GetModuleHandle(KIERO_TEXT("vulkan-1.dll")) != NULL)
 			{
 				type = RenderType::Vulkan;
 			}
@@ -728,7 +728,7 @@ kiero::Status::Enum kiero::bind(uint16_t _index, void** _original, void* _functi
 {
 	// TODO: Need own detour function
 
-	assert(_index >= 0 && _original != NULL && _function != NULL);
+	assert(_original != NULL && _function != NULL);
 
 	if (g_renderType != RenderType::None)
 	{
@@ -755,8 +755,6 @@ kiero::Status::Enum kiero::bind(uint16_t _index, void** _original, void* _functi
 
 void kiero::unbind(uint16_t _index)
 {
-	assert(_index >= 0);
-
 	if (g_renderType != RenderType::None)
 	{
 #if KIERO_USE_MINHOOK
