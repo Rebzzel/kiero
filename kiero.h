@@ -79,6 +79,7 @@ namespace kiero
 	void unbind(uint16_t index);
 
 	RenderType::Enum getRenderType();
+	uint150_t* getSwapchainTable();
 	uint150_t* getMethodsTable();
 }
 

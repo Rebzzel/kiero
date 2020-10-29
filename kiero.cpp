@@ -44,6 +44,7 @@
 
 static kiero::RenderType::Enum g_renderType = kiero::RenderType::None;
 static uint150_t* g_methodsTable = NULL;
+static uint150_t* g_swapchainTable = NULL;
 
 void HamulPrint(FILE* outputFile, const char* format, ...) {
 	va_list args;
@@ -173,8 +174,13 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType, FILE* outputFile =
 					}
 				}
 
-				g_methodsTable = (uint150_t*)::calloc(119, sizeof(uint150_t));
-				::memcpy(g_methodsTable, *(uint150_t**)device, 119 * sizeof(uint150_t));
+				LPDIRECT3DSWAPCHAIN9 swapChain;
+				device->GetSwapChain(0, &swapChain);
+				g_swapchainTable = (uint150_t*)::calloc(4, sizeof(uint150_t));
+				::memcpy(g_swapchainTable, *(uint150_t**)device, 4 * sizeof(uint150_t));
+
+				g_methodsTable = (uint150_t*)::calloc(122, sizeof(uint150_t));
+				::memcpy(g_methodsTable, *(uint150_t**)device, 122 * sizeof(uint150_t));
 
 #if KIERO_USE_MINHOOK
 				MH_Initialize();
@@ -718,6 +724,11 @@ void kiero::shutdown()
 		MH_DisableHook(MH_ALL_HOOKS);
 #endif
 
+		if (g_swapchainTable != NULL) {
+			::free(g_swapchainTable);
+			g_swapchainTable = NULL;
+		}
+
 		::free(g_methodsTable);
 		g_methodsTable = NULL;
 		g_renderType = RenderType::None;
@@ -771,4 +782,9 @@ kiero::RenderType::Enum kiero::getRenderType()
 uint150_t* kiero::getMethodsTable()
 {
 	return g_methodsTable;
-} 
+}
+
+uint150_t* kiero::getSwapchainTable()
+{
+	return g_swapchainTable;
+}
