@@ -92,14 +92,11 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD fdwReason, LPVOID)
 
 ```
 
-### Contributors
-[Rebzzel](https://github.com/Rebzzel)
-
 ### License
 ```
 MIT License
 
-Copyright (c) 2014-2020 Rebzzel
+Copyright (c) 2014-2021 Rebzzel
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -119,25 +116,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-<br>
-
----
-
-<br>
-<p align="center">
-  See also:
-  <br>
-  <a href="https://github.com/Rebzzel/sfs">
-    sfs
-  </a>
-  /
-  <a href="https://github.com/Rebzzel/PicPrompt">
-    PicPrompt
-  </a>
-  /
-  <a href="https://github.com/Rebzzel?tab=repositories">
-    ...
-  </a>
-</p>
-
-<br>
