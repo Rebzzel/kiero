@@ -6,6 +6,8 @@
 #include <d3d10.h>
 #include <assert.h>
 
+#include "win32_impl.h"
+
 #include "../imgui/imgui.h"
 #include "../imgui/examples/imgui_impl_win32.h"
 #include "../imgui/examples/imgui_impl_dx10.h"
@@ -24,6 +26,8 @@ long __stdcall hkPresent10(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT F
 
 		ID3D10Device* device;
 		pSwapChain->GetDevice(__uuidof(ID3D10Device), (void**)&device);
+
+		impl::win32::init(desc.OutputWindow);
 
 		ImGui::CreateContext();
 		ImGui_ImplWin32_Init(desc.OutputWindow);

@@ -101,18 +101,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 					return Status::UnknownError;
 				}
 
-				D3DDISPLAYMODE displayMode;
-				if (direct3D9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &displayMode) < 0)
-				{
-					::DestroyWindow(window);
-					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
-					return Status::UnknownError;
-				}
-
 				D3DPRESENT_PARAMETERS params;
 				params.BackBufferWidth = 0;
 				params.BackBufferHeight = 0;
-				params.BackBufferFormat = displayMode.Format;
+				params.BackBufferFormat = D3DFMT_UNKNOWN;
 				params.BackBufferCount = 0;
 				params.MultiSampleType = D3DMULTISAMPLE_NONE;
 				params.MultiSampleQuality = NULL;
@@ -126,7 +118,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				params.PresentationInterval = 0;
 
 				LPDIRECT3DDEVICE9 device;
-				if (direct3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, window, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_DISABLE_DRIVER_MANAGEMENT, &params, &device) < 0)
+				if (direct3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_NULLREF, window, D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_DISABLE_DRIVER_MANAGEMENT, &params, &device) < 0)
 				{
 					direct3D9->Release();
 					::DestroyWindow(window);
@@ -141,11 +133,11 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				MH_Initialize();
 #endif
 
-				direct3D9->Release();
-				direct3D9 = NULL;
-
 				device->Release();
 				device = NULL;
+
+				direct3D9->Release();
+				direct3D9 = NULL;
 
 				g_renderType = RenderType::D3D9;
 

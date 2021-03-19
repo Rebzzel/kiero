@@ -5,6 +5,6 @@
 - [x] D3D11
 - [ ] D3D12
 - [ ] OpenGL
-- [ ] Vulcan
+- [ ] Vulkan
 
 Author(s): [Rebzzel](https://github.com/Rebzzel)

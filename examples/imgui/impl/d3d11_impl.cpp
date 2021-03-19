@@ -6,6 +6,8 @@
 #include <d3d11.h>
 #include <assert.h>
 
+#include "win32_impl.h"
+
 #include "../imgui/imgui.h"
 #include "../imgui/examples/imgui_impl_win32.h"
 #include "../imgui/examples/imgui_impl_dx11.h"
@@ -27,6 +29,8 @@ long __stdcall hkPresent11(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT F
 
 		ID3D11DeviceContext* context;
 		device->GetImmediateContext(&context);
+
+		impl::win32::init(desc.OutputWindow);
 
 		ImGui::CreateContext();
 		ImGui_ImplWin32_Init(desc.OutputWindow);

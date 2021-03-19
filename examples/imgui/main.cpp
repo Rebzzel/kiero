@@ -55,7 +55,7 @@ int kieroExampleThread()
             // TODO: OpenGL implementation?
             break;
         case kiero::RenderType::Vulkan:
-            // TODO: Vulcan implementation?
+            // TODO: Vulkan implementation?
             break;
         }
 

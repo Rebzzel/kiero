@@ -6,6 +6,8 @@
 #include <d3d9.h>
 #include <assert.h>
 
+#include "win32_impl.h"
+
 #include "../imgui/imgui.h"
 #include "../imgui/examples/imgui_impl_win32.h"
 #include "../imgui/examples/imgui_impl_dx9.h"
@@ -33,6 +35,8 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 	{
 		D3DDEVICE_CREATION_PARAMETERS params;
 		pDevice->GetCreationParameters(&params);
+
+		impl::win32::init(params.hFocusWindow);
 
 		ImGui::CreateContext();
 		ImGui_ImplWin32_Init(params.hFocusWindow);
