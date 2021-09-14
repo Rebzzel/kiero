@@ -1,15 +1,15 @@
 #include "../../kiero.h"
 
 #if KIERO_INCLUDE_D3D9
-# include "impl/d3d9_impl.h"
+#include "impl/d3d9_impl.h"
 #endif
 
 #if KIERO_INCLUDE_D3D10
-# include "impl/d3d10_impl.h"
+#include "impl/d3d10_impl.h"
 #endif
 
 #if KIERO_INCLUDE_D3D11
-# include "impl/d3d11_impl.h"
+#include "impl/d3d11_impl.h"
 #endif
 
 #if KIERO_INCLUDE_D3D12
@@ -22,7 +22,7 @@
 #endif
 
 #if !KIERO_USE_MINHOOK
-# error "The example requires that minhook be enabled!"
+#error "The example requires that minhook be enabled!"
 #endif
 
 #include <Windows.h>
@@ -34,29 +34,35 @@ int kieroExampleThread()
         switch (kiero::getRenderType())
         {
 #if KIERO_INCLUDE_D3D9
-        case kiero::RenderType::D3D9:
-            impl::d3d9::init();
-            break;
+            case kiero::RenderType::D3D9:
+                impl::d3d9::init();
+                break;
 #endif
 #if KIERO_INCLUDE_D3D10
-        case kiero::RenderType::D3D10:
-            impl::d3d10::init();
-            break;
+            case kiero::RenderType::D3D10:
+                impl::d3d10::init();
+                break;
 #endif
 #if KIERO_INCLUDE_D3D11
-        case kiero::RenderType::D3D11:
-            impl::d3d11::init();
-            break;
+            case kiero::RenderType::D3D11:
+                impl::d3d11::init();
+                break;
 #endif
-        case kiero::RenderType::D3D12:
-            // TODO: D3D12 implementation?
-            break;
-        case kiero::RenderType::OpenGL:
-            // TODO: OpenGL implementation?
-            break;
-        case kiero::RenderType::Vulkan:
-            // TODO: Vulkan implementation?
-            break;
+#if KIERO_INCLUDE_D3D12
+            case kiero::RenderType::D3D12:
+                // TODO: D3D12 implementation?
+                break;
+#endif
+#if KIERO_INCLUDE_OPENGL
+            case kiero::RenderType::OpenGL:
+                // TODO: OpenGL implementation?
+                break;
+#endif
+#if KIERO_INCLUDE_VULKAN
+            case kiero::RenderType::Vulkan:
+                // TODO: Vulkan implementation?
+                break;
+#endif
         }
 
         return 1;
@@ -71,9 +77,9 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD fdwReason, LPVOID)
 
     switch (fdwReason)
     {
-    case DLL_PROCESS_ATTACH:
-        CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)kieroExampleThread, NULL, 0, NULL);
-        break;
+        case DLL_PROCESS_ATTACH:
+            CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)kieroExampleThread, NULL, 0, NULL);
+            break;
     }
 
     return TRUE;

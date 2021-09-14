@@ -1,5 +1,4 @@
-#ifndef __KIERO_H__
-#define __KIERO_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -13,23 +12,6 @@
 #define KIERO_INCLUDE_VULKAN 0 // 1 if you need Vulkan hook
 #define KIERO_USE_MINHOOK    0 // 1 if you will use kiero::bind function
 
-#define KIERO_ARCH_X64 0
-#define KIERO_ARCH_X86 0
-
-#if defined(_M_X64)	
-# undef  KIERO_ARCH_X64
-# define KIERO_ARCH_X64 1
-#else
-# undef  KIERO_ARCH_X86
-# define KIERO_ARCH_X86 1
-#endif
-
-#if KIERO_ARCH_X64
-typedef uint64_t uint150_t;
-#else
-typedef uint32_t uint150_t;
-#endif
-
 namespace kiero
 {
 	struct Status
@@ -39,10 +21,8 @@ namespace kiero
 			UnknownError = -1,
 			NotSupportedError = -2,
 			ModuleNotFoundError = -3,
-
 			AlreadyInitializedError = -4,
 			NotInitializedError = -5,
-
 			Success = 0,
 		};
 	};
@@ -52,15 +32,12 @@ namespace kiero
 		enum Enum
 		{
 			None,
-
 			D3D9,
 			D3D10,
 			D3D11,
 			D3D12,
-
 			OpenGL,
 			Vulkan,
-
 			Auto
 		};
 	};
@@ -72,7 +49,5 @@ namespace kiero
 	void unbind(uint16_t index);
 
 	RenderType::Enum getRenderType();
-	uint150_t* getMethodsTable();
+	uintptr_t* getMethodsTable();
 }
-
-#endif // __KIERO_H__

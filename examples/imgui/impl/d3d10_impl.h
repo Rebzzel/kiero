@@ -1,5 +1,4 @@
-#ifndef __D3D10_IMPL_H__
-#define __D3D10_IMPL_H__
+#pragma once
 
 #include "shared.h"
 
@@ -10,5 +9,3 @@ namespace impl
 		void init();
 	}
 }
-
-#endif // __D3D10_IMPL_H__

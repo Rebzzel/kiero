@@ -3,47 +3,47 @@
 #include <assert.h>
 
 #if KIERO_INCLUDE_D3D9
-# include <d3d9.h>
+#include <d3d9.h>
 #endif
 
 #if KIERO_INCLUDE_D3D10
-# include <dxgi.h>
-# include <d3d10_1.h>
-# include <d3d10.h>
+#include <dxgi.h>
+#include <d3d10_1.h>
+#include <d3d10.h>
 #endif
 
 #if KIERO_INCLUDE_D3D11
-# include <dxgi.h>
-# include <d3d11.h>
+#include <dxgi.h>
+#include <d3d11.h>
 #endif
 
 #if KIERO_INCLUDE_D3D12
-# include <dxgi.h>
-# include <d3d12.h>
+#include <dxgi.h>
+#include <d3d12.h>
 #endif
 
 #if KIERO_INCLUDE_OPENGL
-# include <gl/GL.h>
+#include <gl/GL.h>
 #endif
 
 #if KIERO_INCLUDE_VULKAN
-# include <vulkan/vulkan.h>
+#include <vulkan/vulkan.h>
 #endif
 
 #if KIERO_USE_MINHOOK
-# include "minhook/include/MinHook.h"
+#include <MinHook.h>
 #endif
 
 #ifdef _UNICODE
-# define KIERO_TEXT(text) L##text
+#define KIERO_TEXT(text) L##text
 #else
-# define KIERO_TEXT(text) text
+#define KIERO_TEXT(text) text
 #endif
 
 #define KIERO_ARRAY_SIZE(arr) ((size_t)(sizeof(arr)/sizeof(arr[0])))
 
 static kiero::RenderType::Enum g_renderType = kiero::RenderType::None;
-static uint150_t* g_methodsTable = NULL;
+static uintptr_t* g_methodsTable = NULL;
 
 kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 {
@@ -126,8 +126,8 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 					return Status::UnknownError;
 				}
 
-				g_methodsTable = (uint150_t*)::calloc(119, sizeof(uint150_t));
-				::memcpy(g_methodsTable, *(uint150_t**)device, 119 * sizeof(uint150_t));
+				g_methodsTable = (uintptr_t*)::calloc(119, sizeof(uintptr_t));
+				::memcpy(g_methodsTable, *(uintptr_t**)device, 119 * sizeof(uintptr_t));
 
 #if KIERO_USE_MINHOOK
 				MH_Initialize();
@@ -235,9 +235,9 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 					return Status::UnknownError;
 				}
 
-				g_methodsTable = (uint150_t*)::calloc(116, sizeof(uint150_t));
-				::memcpy(g_methodsTable, *(uint150_t**)swapChain, 18 * sizeof(uint150_t));
-				::memcpy(g_methodsTable + 18, *(uint150_t**)device, 98 * sizeof(uint150_t));
+				g_methodsTable = (uintptr_t*)::calloc(116, sizeof(uintptr_t));
+				::memcpy(g_methodsTable, *(uintptr_t**)swapChain, 18 * sizeof(uintptr_t));
+				::memcpy(g_methodsTable + 18, *(uintptr_t**)device, 98 * sizeof(uintptr_t));
 
 #if KIERO_USE_MINHOOK
 				MH_Initialize();
@@ -328,10 +328,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 					return Status::UnknownError;
 				}
 
-				g_methodsTable = (uint150_t*)::calloc(205, sizeof(uint150_t));
-				::memcpy(g_methodsTable, *(uint150_t**)swapChain, 18 * sizeof(uint150_t));
-				::memcpy(g_methodsTable + 18, *(uint150_t**)device, 43 * sizeof(uint150_t));
-				::memcpy(g_methodsTable + 18 + 43, *(uint150_t**)context, 144 * sizeof(uint150_t));
+				g_methodsTable = (uintptr_t*)::calloc(205, sizeof(uintptr_t));
+				::memcpy(g_methodsTable, *(uintptr_t**)swapChain, 18 * sizeof(uintptr_t));
+				::memcpy(g_methodsTable + 18, *(uintptr_t**)device, 43 * sizeof(uintptr_t));
+				::memcpy(g_methodsTable + 18 + 43, *(uintptr_t**)context, 144 * sizeof(uintptr_t));
 
 #if KIERO_USE_MINHOOK
 				MH_Initialize();
@@ -555,11 +555,11 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 
 				size_t size = KIERO_ARRAY_SIZE(methodsNames);
 
-				g_methodsTable = (uint150_t*)::calloc(size, sizeof(uint150_t));
+				g_methodsTable = (uintptr_t*)::calloc(size, sizeof(uintptr_t));
 
 				for (int i = 0; i < size; i++)
 				{
-					g_methodsTable[i] = (uint150_t)::GetProcAddress(libOpenGL32, methodsNames[i]);
+					g_methodsTable[i] = (uintptr_t)::GetProcAddress(libOpenGL32, methodsNames[i]);
 				}
 
 #if KIERO_USE_MINHOOK
@@ -713,7 +713,7 @@ kiero::RenderType::Enum kiero::getRenderType()
 	return g_renderType;
 }
 
-uint150_t* kiero::getMethodsTable()
+uintptr_t* kiero::getMethodsTable()
 {
 	return g_methodsTable;
 } 
