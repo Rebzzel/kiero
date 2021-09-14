@@ -1,4 +1,4 @@
-﻿#include "../../../kiero.h"
+#include "../../../kiero.h"
 
 #include "win32_impl.h"
 #include <Windows.h>
@@ -10,19 +10,16 @@ static WNDPROC oWndProc = NULL;
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-LRESULT CALLBACK hkWindowProc(
-	_In_ HWND   hwnd,
-	_In_ UINT   uMsg,
-	_In_ WPARAM wParam,
-	_In_ LPARAM lParam
-)
+LRESULT CALLBACK hkWindowProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam) > 0)
-		return 1L;	
-	return ::CallWindowProcA(oWndProc, hwnd, uMsg, wParam, lParam);
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
+		return true;
+
+	return ::CallWindowProc(oWndProc, hwnd, uMsg, wParam, lParam);
 }
 
 void impl::win32::init(void* hwnd)
 {
-	oWndProc = (WNDPROC)::SetWindowLongPtr((HWND)hwnd, GWLP_WNDPROC, (LONG)hkWindowProc);
+	if (oWndProc == NULL)
+		oWndProc = (WNDPROC)::SetWindowLongPtr((HWND)hwnd, GWLP_WNDPROC, (LONG_PTR)hkWindowProc);
 }
