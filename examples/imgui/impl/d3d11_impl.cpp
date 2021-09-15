@@ -9,8 +9,8 @@
 #include "win32_impl.h"
 
 #include "../imgui/imgui.h"
-#include "../imgui/examples/imgui_impl_win32.h"
-#include "../imgui/examples/imgui_impl_dx11.h"
+#include "../imgui/backends/imgui_impl_win32.h"
+#include "../imgui/backends/imgui_impl_dx11.h"
 
 typedef long(__stdcall* Present)(IDXGISwapChain*, UINT, UINT);
 static Present oPresent = NULL;
