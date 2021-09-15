@@ -32,6 +32,13 @@
 
 #if KIERO_USE_MINHOOK
 #include <MinHook.h>
+
+#if defined _M_X64
+#pragma comment(lib, "MinHook.x64.lib")
+#elif defined _M_IX86
+#pragma comment(lib, "MinHook.x86.lib")
+#endif
+
 #endif
 
 #ifdef _UNICODE
