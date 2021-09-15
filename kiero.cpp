@@ -477,12 +477,12 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 					return Status::UnknownError;
 				}
 
-				g_methodsTable = (uint150_t*)::calloc(150, sizeof(uint150_t));
-				::memcpy(g_methodsTable, *(uint150_t**)device, 44 * sizeof(uint150_t));
-				::memcpy(g_methodsTable + 44, *(uint150_t**)commandQueue, 19 * sizeof(uint150_t));
-				::memcpy(g_methodsTable + 44 + 19, *(uint150_t**)commandAllocator, 9 * sizeof(uint150_t));
-				::memcpy(g_methodsTable + 44 + 19 + 9, *(uint150_t**)commandList, 60 * sizeof(uint150_t));
-				::memcpy(g_methodsTable + 44 + 19 + 9 + 60, *(uint150_t**)swapChain, 18 * sizeof(uint150_t));
+				g_methodsTable = (uintptr_t*)::calloc(150, sizeof(uintptr_t));
+				::memcpy(g_methodsTable, *(uintptr_t**)device, 44 * sizeof(uintptr_t));
+				::memcpy(g_methodsTable + 44, *(uintptr_t**)commandQueue, 19 * sizeof(uintptr_t));
+				::memcpy(g_methodsTable + 44 + 19, *(uintptr_t**)commandAllocator, 9 * sizeof(uintptr_t));
+				::memcpy(g_methodsTable + 44 + 19 + 9, *(uintptr_t**)commandList, 60 * sizeof(uintptr_t));
+				::memcpy(g_methodsTable + 44 + 19 + 9 + 60, *(uintptr_t**)swapChain, 18 * sizeof(uintptr_t));
 
 #if KIERO_USE_MINHOOK
 				MH_Initialize();
@@ -610,11 +610,11 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 
 				size_t size = KIERO_ARRAY_SIZE(methodsNames);
 
-				g_methodsTable = (uint150_t*)::calloc(size, sizeof(uint150_t));
+				g_methodsTable = (uintptr_t*)::calloc(size, sizeof(uintptr_t));
 
 				for (int i = 0; i < size; i++)
 				{
-					g_methodsTable[i] = (uint150_t)::GetProcAddress(libVulkan, methodsNames[i]);
+					g_methodsTable[i] = (uintptr_t)::GetProcAddress(libVulkan, methodsNames[i]);
 				}
 
 #if KIERO_USE_MINHOOK
