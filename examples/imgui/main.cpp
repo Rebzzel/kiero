@@ -16,6 +16,7 @@
 #endif
 
 #if KIERO_INCLUDE_OPENGL
+#include "impl/opengl_impl.h"
 #endif
 
 #if KIERO_INCLUDE_VULKAN
@@ -55,7 +56,7 @@ int kieroExampleThread()
 #endif
 #if KIERO_INCLUDE_OPENGL
             case kiero::RenderType::OpenGL:
-                // TODO: OpenGL implementation?
+                impl::opengl::init();
                 break;
 #endif
 #if KIERO_INCLUDE_VULKAN
