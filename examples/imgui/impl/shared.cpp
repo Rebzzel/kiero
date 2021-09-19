@@ -1,8 +1,8 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 
-#include "../../../kiero.h"
+#include "kiero.h"
 #include "shared.h"
-#include "../imgui/imgui.h"
+#include "imgui/imgui.h"
 
 void impl::showExampleWindow(const char* comment)
 {

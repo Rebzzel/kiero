@@ -1,4 +1,4 @@
-#include "../../kiero.h"
+#include "kiero.h"
 
 #if KIERO_INCLUDE_D3D9
 #include "impl/d3d9_impl.h"

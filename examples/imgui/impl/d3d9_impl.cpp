@@ -1,4 +1,4 @@
-﻿#include "../../../kiero.h"
+﻿#include "kiero.h"
 
 #if KIERO_INCLUDE_D3D9
 
@@ -7,9 +7,9 @@
 
 #include "win32_impl.h"
 
-#include "../imgui/imgui.h"
-#include "../imgui/backends/imgui_impl_win32.h"
-#include "../imgui/backends/imgui_impl_dx9.h"
+#include "imgui/imgui.h"
+#include "imgui/backends/imgui_impl_win32.h"
+#include "imgui/backends/imgui_impl_dx9.h"
 
 typedef long(__stdcall* Reset)(LPDIRECT3DDEVICE9, D3DPRESENT_PARAMETERS*);
 static Reset oReset = NULL;

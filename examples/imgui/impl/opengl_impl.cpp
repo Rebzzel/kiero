@@ -1,4 +1,4 @@
-﻿#include "../../../kiero.h"
+﻿#include "kiero.h"
 
 #if KIERO_INCLUDE_OPENGL
 
@@ -7,9 +7,9 @@
 
 #include "win32_impl.h"
 
-#include "../imgui/imgui.h"
-#include "../imgui/backends/imgui_impl_win32.h"
-#include "../imgui/backends/imgui_impl_opengl3.h"
+#include "imgui/imgui.h"
+#include "imgui/backends/imgui_impl_win32.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
 
 typedef bool(__stdcall* wglSwapBuffers)(HDC);
 static wglSwapBuffers oWglSwapBuffers = NULL;
