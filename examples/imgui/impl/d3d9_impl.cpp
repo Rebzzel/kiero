@@ -4,7 +4,6 @@
 
 #include "d3d9_impl.h"
 #include <d3d9.h>
-#include <assert.h>
 
 #include "win32_impl.h"
 

@@ -1,9 +1,11 @@
 #pragma once
 
 #include <Windows.h>
+#include <assert.h>
+#include <stdio.h>
 #include <stdint.h>
 
-#define KIERO_VERSION "1.2.12"
+#define KIERO_VERSION "1.3.0"
 
 #define KIERO_INCLUDE_D3D9   0 // 1 if you need D3D9 hook
 #define KIERO_INCLUDE_D3D10  0 // 1 if you need D3D10 hook

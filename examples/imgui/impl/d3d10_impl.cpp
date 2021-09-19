@@ -4,7 +4,6 @@
 
 #include "d3d10_impl.h"
 #include <d3d10.h>
-#include <assert.h>
 
 #include "win32_impl.h"
 

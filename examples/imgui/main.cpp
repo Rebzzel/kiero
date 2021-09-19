@@ -26,8 +26,6 @@
 #error "The example requires that minhook be enabled!"
 #endif
 
-#include <Windows.h>
-
 int kieroExampleThread()
 {
     if (kiero::init(kiero::RenderType::Auto) == kiero::Status::Success)

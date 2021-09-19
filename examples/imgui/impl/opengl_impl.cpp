@@ -2,10 +2,8 @@
 
 #if KIERO_INCLUDE_OPENGL
 
-#include <Windows.h>
 #include "opengl_impl.h"
 #include <gl/GL.h>
-#include <assert.h>
 
 #include "win32_impl.h"
 
