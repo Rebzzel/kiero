@@ -1,6 +1,7 @@
 #include "kiero.h"
 #include <Windows.h>
 #include <assert.h>
+#include <stdio.h>
 
 #if KIERO_INCLUDE_D3D9
 #include <d3d9.h>
@@ -406,7 +407,7 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 				}
 
 				ID3D12Device* device;
-				if (((long(__stdcall*)(IUnknown*, D3D_FEATURE_LEVEL, const IID&, void**))(D3D12CreateDevice))(adapter, D3D_FEATURE_LEVEL_11_0, __uuidof(ID3D12Device), (void**)&device) < 0)
+				if (((long(__stdcall*)(IUnknown*, D3D_FEATURE_LEVEL, const IID&, void**))(D3D12CreateDevice))(adapter, D3D_FEATURE_LEVEL_12_0, __uuidof(ID3D12Device), (void**)&device) < 0)
 				{
 					::DestroyWindow(window);
 					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
@@ -697,6 +698,31 @@ kiero::Status::Enum kiero::bind(uint16_t _index, void** _original, void* _functi
 		{
 			return Status::UnknownError;
 		}
+#endif
+
+		return Status::Success;
+	}
+
+	return Status::NotInitializedError;
+}
+
+kiero::Status::Enum kiero::bindApi(LPCWSTR pszModule, LPCSTR pszProcName, LPVOID pDetour, LPVOID* ppOriginal)
+{
+	if (g_renderType != RenderType::None)
+	{
+#if KIERO_USE_MINHOOK
+		LPVOID pTarget = NULL;
+		MH_STATUS status = MH_UNKNOWN;
+
+		status = MH_CreateHookApiEx(pszModule, pszProcName, pDetour, ppOriginal, &pTarget);
+
+		if (status != MH_OK)
+			return Status::UnknownError;
+
+		status = MH_EnableHook(pTarget);
+
+		if (status != MH_OK)
+			return Status::UnknownError;
 #endif
 
 		return Status::Success;

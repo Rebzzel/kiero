@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Windows.h>
 #include <stdint.h>
 
 #define KIERO_VERSION "1.2.12"
@@ -46,6 +47,7 @@ namespace kiero
 	void shutdown();
 
 	Status::Enum bind(uint16_t index, void** original, void* function);
+	Status::Enum bindApi(LPCWSTR pszModule, LPCSTR pszProcName, LPVOID pDetour, LPVOID* ppOriginal);
 	void unbind(uint16_t index);
 
 	RenderType::Enum getRenderType();

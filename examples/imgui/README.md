@@ -4,7 +4,7 @@
 - [x] D3D10
 - [x] D3D11
 - [ ] D3D12
-- [ ] OpenGL
+- [x] OpenGL
 - [ ] Vulkan
 
 Author(s): [Rebzzel](https://github.com/Rebzzel)
