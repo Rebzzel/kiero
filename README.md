@@ -7,7 +7,7 @@
     <img src="https://img.shields.io/github/stars/Rebzzel/kiero.svg?style=flat-square"/>
   </a>
   <br>
-  Universal graphical hook for a D3D9-D3D12, OpenGL and Vulcan based games
+  Universal graphical hook for a D3D9-D3D12, OpenGL and Vulkan based games
 </p>
 
 ### Requirement
