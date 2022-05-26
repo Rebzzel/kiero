@@ -31,18 +31,18 @@
 #endif
 
 #if KIERO_USE_MINHOOK
-# include "minhook/include/MinHook.h"
+# include <MinHook.h>
 #endif
 
 #if KIERO_USE_POLYHOOK
 #include <map>
-#include "polyhook2/CapstoneDisassembler.hpp"
+#include <polyhook2/CapstoneDisassembler.hpp>
 #if KIERO_ARCH_X64
-# include "polyhook2/Detour/x64Detour.hpp"
+# include <polyhook2/Detour/x64Detour.hpp>
 PLH::CapstoneDisassembler disassembler(PLH::Mode::x64);
 #endif
 #if KIERO_ARCH_X86
-# include "polyhook2/Detour/x86Detour.hpp"
+# include <polyhook2/Detour/x86Detour.hpp>
 PLH::CapstoneDisassembler disassembler(PLH::Mode::x86);
 #endif
 #endif
