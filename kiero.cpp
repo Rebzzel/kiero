@@ -36,14 +36,11 @@
 
 #if KIERO_USE_POLYHOOK
 #include <map>
-#include <polyhook2/CapstoneDisassembler.hpp>
 #if KIERO_ARCH_X64
 # include <polyhook2/Detour/x64Detour.hpp>
-PLH::CapstoneDisassembler disassembler(PLH::Mode::x64);
 #endif
 #if KIERO_ARCH_X86
 # include <polyhook2/Detour/x86Detour.hpp>
-PLH::CapstoneDisassembler disassembler(PLH::Mode::x86);
 #endif
 #endif
 
@@ -714,10 +711,10 @@ kiero::Status::Enum kiero::bind(uint16_t _index, void** _original, void* _functi
 		//The detour object needs to stay 'alive' since polyhook will unhook the function when the object is destroyed
 		//This is why here I heap allocate
 #if KIERO_ARCH_X64
-		detours[_index] = new PLH::x64Detour((char*)target, (char*)_function, (uint64_t*)_original, disassembler);
+		detours[_index] = new PLH::x64Detour((char*)target, (char*)_function, (uint64_t*)_original);
 #endif
 #if KIERO_ARCH_X86
-		detours[_index] = new PLH::x86Detour((char*)target, (char*)_function, (uint64_t*)_original, disassembler);
+		detours[_index] = new PLH::x86Detour((char*)target, (char*)_function, (uint64_t*)_original);
 #endif
 
 		if(!detours[_index]->hook()) {
