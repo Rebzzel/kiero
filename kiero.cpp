@@ -711,10 +711,10 @@ kiero::Status::Enum kiero::bind(uint16_t _index, void** _original, void* _functi
 		//The detour object needs to stay 'alive' since polyhook will unhook the function when the object is destroyed
 		//This is why here I heap allocate
 #if KIERO_ARCH_X64
-		detours[_index] = new PLH::x64Detour((char*)target, (char*)_function, (uint64_t*)_original);
+		detours[_index] = new PLH::x64Detour((uint64_t)target, (uint64_t)_function, (uint64_t*)_original);
 #endif
 #if KIERO_ARCH_X86
-		detours[_index] = new PLH::x86Detour((char*)target, (char*)_function, (uint64_t*)_original);
+		detours[_index] = new PLH::x86Detour((uint64_t)target, (uint64_t)_function, (uint64_t*)_original);
 #endif
 
 		if(!detours[_index]->hook()) {
