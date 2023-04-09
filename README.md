@@ -11,9 +11,9 @@
 </p>
 
 ### Requirement
-[Windows SDK](https://www.microsoft.com/en-us/download/details.aspx?id=8279) (For D3D9/D3D10/D3D11/OpenGL hook)
+[Windows SDK](https://www.microsoft.com/en-us/download/details.aspx?id=8279) (For D3D9/D3D10/D3D10.1/D3D11/OpenGL hook)
 
-[DirectX SDK](https://www.microsoft.com/en-us/download/details.aspx?id=4064) (For D3D9/D3D10/D3D11 hook)
+[DirectX SDK](https://www.microsoft.com/en-us/download/details.aspx?id=4064) (For D3D9/D3D10/D3D10.1/D3D11 hook)
 
 [Vulkan SDK](https://www.lunarg.com/vulkan-sdk) (For Vulkan hook)
 
@@ -22,13 +22,13 @@
 ### Example
 To start, go to the kiero.h and select the desired hooks
 ```C++
-// Example for D3D9 hook
-#define KIERO_INCLUDE_D3D9   1 // 1 if you need D3D9 hook
-#define KIERO_INCLUDE_D3D10  0 // 1 if you need D3D10 hook
-#define KIERO_INCLUDE_D3D11  0 // 1 if you need D3D11 hook
-#define KIERO_INCLUDE_D3D12  0 // 1 if you need D3D12 hook
-#define KIERO_INCLUDE_OPENGL 0 // 1 if you need OpenGL hook
-#define KIERO_INCLUDE_VULKAN 0 // 1 if you need Vulkan hook
+#define KIERO_INCLUDE_D3D9     0 // 1 if you need D3D9 hook
+#define KIERO_INCLUDE_D3D10    0 // 1 if you need D3D10 hook
+#define KIERO_INCLUDE_D3D10_1  0 // 1 if you need D3D10.1 hook
+#define KIERO_INCLUDE_D3D11    0 // 1 if you need D3D11 hook
+#define KIERO_INCLUDE_D3D12    0 // 1 if you need D3D12 hook
+#define KIERO_INCLUDE_OPENGL   0 // 1 if you need OpenGL hook
+#define KIERO_INCLUDE_VULKAN   0 // 1 if you need Vulkan hook
 ```
 
 Then proceed to the main work

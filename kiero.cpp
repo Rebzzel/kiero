@@ -6,7 +6,7 @@
 # include <d3d9.h>
 #endif
 
-#if KIERO_INCLUDE_D3D10
+#if KIERO_INCLUDE_D3D10 || KIERO_INCLUDE_D3D10_1
 # include <dxgi.h>
 # include <d3d10_1.h>
 # include <d3d10.h>
@@ -229,6 +229,109 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 					DXGI_SWAP_CHAIN_DESC*,
 					IDXGISwapChain**,
 					ID3D10Device**))(D3D10CreateDeviceAndSwapChain))(adapter, D3D10_DRIVER_TYPE_HARDWARE, NULL, 0, D3D10_SDK_VERSION, &swapChainDesc, &swapChain, &device) < 0)
+				{
+					::DestroyWindow(window);
+					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+					return Status::UnknownError;
+				}
+
+				g_methodsTable = (uint150_t*)::calloc(116, sizeof(uint150_t));
+				::memcpy(g_methodsTable, *(uint150_t**)swapChain, 18 * sizeof(uint150_t));
+				::memcpy(g_methodsTable + 18, *(uint150_t**)device, 98 * sizeof(uint150_t));
+
+#if KIERO_USE_MINHOOK
+				MH_Initialize();
+#endif
+
+				swapChain->Release();
+				swapChain = NULL;
+
+				device->Release();
+				device = NULL;
+
+				::DestroyWindow(window);
+				::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+
+				g_renderType = RenderType::D3D10;
+
+				return Status::Success;
+#endif
+			}
+			else if (_renderType == RenderType::D3D10_1)
+			{
+#if KIERO_INCLUDE_D3D10_1
+				HMODULE libDXGI;
+				HMODULE libD3D10;
+				if ((libDXGI = ::GetModuleHandle(KIERO_TEXT("dxgi.dll"))) == NULL || (libD3D10 = ::GetModuleHandle(KIERO_TEXT("d3d10_1.dll"))) == NULL)
+				{
+					::DestroyWindow(window);
+					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+					return Status::ModuleNotFoundError;
+				}
+
+				void* CreateDXGIFactory;
+				if ((CreateDXGIFactory = ::GetProcAddress(libDXGI, "CreateDXGIFactory")) == NULL)
+				{
+					::DestroyWindow(window);
+					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+					return Status::UnknownError;
+				}
+
+				IDXGIFactory* factory;
+				if (((long(__stdcall*)(const IID&, void**))(CreateDXGIFactory))(__uuidof(IDXGIFactory), (void**)&factory) < 0)
+				{
+					::DestroyWindow(window);
+					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+					return Status::UnknownError;
+				}
+
+				IDXGIAdapter* adapter;
+				if (factory->EnumAdapters(0, &adapter) == DXGI_ERROR_NOT_FOUND)
+				{
+					::DestroyWindow(window);
+					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+					return Status::UnknownError;
+				}
+
+				void* D3D10CreateDeviceAndSwapChain;
+				if ((D3D10CreateDeviceAndSwapChain = ::GetProcAddress(libD3D10, "D3D10CreateDeviceAndSwapChain1")) == NULL)
+				{
+					::DestroyWindow(window);
+					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+					return Status::UnknownError;
+				}
+
+				DXGI_RATIONAL refreshRate;
+				refreshRate.Numerator = 60;
+				refreshRate.Denominator = 1;
+
+				DXGI_MODE_DESC bufferDesc;
+				bufferDesc.Width = 100;
+				bufferDesc.Height = 100;
+				bufferDesc.RefreshRate = refreshRate;
+				bufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				bufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+				bufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+
+				DXGI_SAMPLE_DESC sampleDesc;
+				sampleDesc.Count = 1;
+				sampleDesc.Quality = 0;
+
+				DXGI_SWAP_CHAIN_DESC swapChainDesc;
+				swapChainDesc.BufferDesc = bufferDesc;
+				swapChainDesc.SampleDesc = sampleDesc;
+				swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+				swapChainDesc.BufferCount = 1;
+				swapChainDesc.OutputWindow = window;
+				swapChainDesc.Windowed = 1;
+				swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+				swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+				IDXGISwapChain* swapChain;
+				ID3D10Device* device;
+
+				auto d3D101CreateDeviceAndSwapChain = reinterpret_cast<decltype(D3D10CreateDeviceAndSwapChain1)*>(D3D10CreateDeviceAndSwapChain);
+				if (d3D101CreateDeviceAndSwapChain(adapter, D3D10_DRIVER_TYPE_HARDWARE, nullptr, 0, D3D10_FEATURE_LEVEL_10_1, D3D10_1_SDK_VERSION, &swapChainDesc, &swapChain, &device) < 0)
 				{
 					::DestroyWindow(window);
 					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
@@ -633,6 +736,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 			else if (::GetModuleHandle(KIERO_TEXT("d3d10.dll")) != NULL)
 			{
 				type = RenderType::D3D10;
+			}
+			else if (::GetModuleHandle(KIERO_TEXT("d3d10_1.dll")) != NULL)
+			{
+				type = RenderType::D3D10_1;
 			}
 			else if (::GetModuleHandle(KIERO_TEXT("d3d11.dll")) != NULL)
 			{
