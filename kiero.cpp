@@ -689,6 +689,7 @@ void kiero::shutdown()
 		{
 			detour->unHook();
 		}
+		detours.clear();
 #endif
 
 		::free(g_methodsTable);
@@ -747,6 +748,7 @@ void kiero::unbind(uint16_t _index)
 #if KIERO_USE_POLYHOOK
 		detours[_index]->unHook();
 		delete detours[_index];
+		detours.erase(_index);
 #endif
 	}
 }
