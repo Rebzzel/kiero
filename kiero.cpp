@@ -672,6 +672,10 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 	return Status::Success;
 }
 
+#if KIERO_USE_POLYHOOK
+std::map<int, PLH::Detour*> detours;
+#endif
+
 void kiero::shutdown()
 {
 	if (g_renderType != RenderType::None)
@@ -693,9 +697,6 @@ void kiero::shutdown()
 	}
 }
 
-#if KIERO_USE_POLYHOOK
-std::map<int, PLH::Detour*> detours;
-#endif
 kiero::Status::Enum kiero::bind(uint16_t _index, void** _original, void* _function)
 {
 	// TODO: Need own detour function
