@@ -680,6 +680,13 @@ void kiero::shutdown()
 		MH_DisableHook(MH_ALL_HOOKS);
 #endif
 
+#if KIERO_USE_POLYHOOK
+		for (const auto& [index, detour] : detours)
+		{
+			detour->unHook();
+		}
+#endif
+
 		::free(g_methodsTable);
 		g_methodsTable = NULL;
 		g_renderType = RenderType::None;
