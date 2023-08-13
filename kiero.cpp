@@ -31,7 +31,17 @@
 #endif
 
 #if KIERO_USE_MINHOOK
-# include "minhook/include/MinHook.h"
+# include <MinHook.h>
+#endif
+
+#if KIERO_USE_POLYHOOK
+#include <map>
+#if KIERO_ARCH_X64
+# include <polyhook2/Detour/x64Detour.hpp>
+#endif
+#if KIERO_ARCH_X86
+# include <polyhook2/Detour/x86Detour.hpp>
+#endif
 #endif
 
 #ifdef _UNICODE
@@ -662,12 +672,24 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 	return Status::Success;
 }
 
+#if KIERO_USE_POLYHOOK
+std::map<int, PLH::Detour*> detours;
+#endif
+
 void kiero::shutdown()
 {
 	if (g_renderType != RenderType::None)
 	{
 #if KIERO_USE_MINHOOK
 		MH_DisableHook(MH_ALL_HOOKS);
+#endif
+
+#if KIERO_USE_POLYHOOK
+		for (const auto& [index, detour] : detours)
+		{
+			detour->unHook();
+		}
+		detours.clear();
 #endif
 
 		::free(g_methodsTable);
@@ -692,6 +714,23 @@ kiero::Status::Enum kiero::bind(uint16_t _index, void** _original, void* _functi
 		}
 #endif
 
+#if KIERO_USE_POLYHOOK
+		void* target = (void*)g_methodsTable[_index];
+
+		//The detour object needs to stay 'alive' since polyhook will unhook the function when the object is destroyed
+		//This is why here I heap allocate
+#if KIERO_ARCH_X64
+		detours[_index] = new PLH::x64Detour((uint64_t)target, (uint64_t)_function, (uint64_t*)_original);
+#endif
+#if KIERO_ARCH_X86
+		detours[_index] = new PLH::x86Detour((uint64_t)target, (uint64_t)_function, (uint64_t*)_original);
+#endif
+
+		if(!detours[_index]->hook()) {
+			return Status::UnknownError;
+		}
+#endif
+
 		return Status::Success;
 	}
 
@@ -704,6 +743,12 @@ void kiero::unbind(uint16_t _index)
 	{
 #if KIERO_USE_MINHOOK
 		MH_DisableHook((void*)g_methodsTable[_index]);
+#endif
+
+#if KIERO_USE_POLYHOOK
+		detours[_index]->unHook();
+		delete detours[_index];
+		detours.erase(_index);
 #endif
 	}
 }
